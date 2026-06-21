@@ -111,18 +111,45 @@ export function AmbientAudio() {
     n.gain.gain.setTargetAtTime(0.5, ctx.currentTime, 1.2);
   }, [audioOn, intro]);
 
-  // Duck the bed while the narrator speaks.
+  // Duck the bed while the narrator speaks. Also shift drone/wind by era
+  // (Genesis is quieter; Civilizations adds more drone weight).
   useEffect(() => {
     if (!audioOn || intro !== "done") return;
+    const eraMix = (era: number) => {
+      // returns { drone, wind } multipliers
+      if (era <= 0) return { drone: 0.4, wind: 0.6 };
+      if (era === 1) return { drone: 0.8, wind: 0.9 };
+      if (era === 2) return { drone: 1.0, wind: 1.0 };
+      return { drone: 1.25, wind: 1.05 };
+    };
+    // Initial era apply
+    {
+      const s0 = useWorld.getState();
+      const n = nodesRef.current;
+      const ctx = ctxRef.current;
+      if (n && ctx) {
+        const mix = eraMix(s0.era);
+        n.droneGain.gain.setTargetAtTime(0.06 * mix.drone, ctx.currentTime, 1.5);
+        n.windGain.gain.setTargetAtTime(0.22 * mix.wind, ctx.currentTime, 1.5);
+      }
+    }
     const unsub = useWorld.subscribe((s, prev) => {
       const n = nodesRef.current;
       const ctx = ctxRef.current;
       if (!n || !ctx) return;
+      // duck on narration toggle
       const speaking = !!s.currentNarration;
       const wasSpeaking = !!prev.currentNarration;
-      if (speaking === wasSpeaking) return;
-      n.gain.gain.cancelScheduledValues(ctx.currentTime);
-      n.gain.gain.setTargetAtTime(speaking ? 0.18 : 0.5, ctx.currentTime, speaking ? 0.25 : 0.8);
+      if (speaking !== wasSpeaking) {
+        n.gain.gain.cancelScheduledValues(ctx.currentTime);
+        n.gain.gain.setTargetAtTime(speaking ? 0.18 : 0.5, ctx.currentTime, speaking ? 0.25 : 0.8);
+      }
+      // era shift
+      if (s.era !== prev.era) {
+        const mix = eraMix(s.era);
+        n.droneGain.gain.setTargetAtTime(0.06 * mix.drone, ctx.currentTime, 3.0);
+        n.windGain.gain.setTargetAtTime(0.22 * mix.wind, ctx.currentTime, 3.0);
+      }
     });
     return unsub;
   }, [audioOn, intro]);
