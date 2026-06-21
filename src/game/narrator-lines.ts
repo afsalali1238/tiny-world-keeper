@@ -74,6 +74,8 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "era-1", trigger: "era", text: "An age ends here. The next has already begun, though no one inside the world will notice for some time." },
   { id: "era-2", trigger: "era", text: "They are becoming something new. Their grandparents would not recognise them. Their grandchildren will not recognise us." },
   { id: "era-3", trigger: "era", text: "A century closes. The histories will say it ended on a specific day. It did not." },
+  { id: "era-4", trigger: "era", text: "Something has shifted. They cannot point to it. We can, and we will not." },
+  { id: "era-5", trigger: "era", text: "An age, ending. The first generation of the next age has already been born and given names that will sound old by the time they are old." },
 
   // Life rises.
   { id: "life-1", trigger: "lifeRise", text: "The settlements are growing now. From up here, they look like small constellations, drawn quietly into being." },
