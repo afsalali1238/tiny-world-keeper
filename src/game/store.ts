@@ -34,6 +34,7 @@ interface Actions {
   ackCuriosityToast: () => void;
   markPivotFired: () => void;
   clearGlassMoment: () => void;
+  clearRecentCombo: () => void;
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
   reset: () => void;
@@ -329,6 +330,8 @@ export const useWorld = create<WorldState & Actions>()(
       },
 
       clearGlassMoment: () => set({ glassMomentAt: null }),
+
+      clearRecentCombo: () => set({ recentCombo: null }),
 
       clearOfflineGap: () => set({ offlineGapMs: null }),
 
