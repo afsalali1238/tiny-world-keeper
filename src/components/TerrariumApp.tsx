@@ -5,6 +5,7 @@ import { EraRibbon, LivingPulse, MenuCorner } from "@/components/ui-overlay/HUD"
 import { ChoiceCard } from "@/components/ui-overlay/ChoiceCard";
 import { MythFeed } from "@/components/ui-overlay/MythFeed";
 import { GodActions } from "@/components/ui-overlay/GodActions";
+import { BackgroundDoodles } from "@/components/ui-overlay/BackgroundDoodles";
 import { useWorld } from "@/game/store";
 
 export function TerrariumApp() {
@@ -14,8 +15,9 @@ export function TerrariumApp() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
+      <BackgroundDoodles />
       {mounted && (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 z-10">
           <TerrariumScene />
         </div>
       )}
