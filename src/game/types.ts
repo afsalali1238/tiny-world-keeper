@@ -1,6 +1,14 @@
 export type Trait = "faith" | "curiosity" | "fear" | "harmony";
 export type Weather = "clear" | "rain" | "storm" | "aurora" | null;
 export type IntroStep = "gift" | "name" | "warm" | "water" | "life" | "done";
+export type ToolKind = "rain" | "sun" | "wind" | "seed";
+
+export interface TouchEffect {
+  id: number;
+  kind: ToolKind;
+  pos: [number, number, number];
+  bornAt: number;
+}
 
 export interface WorldState {
   planetName: string;
