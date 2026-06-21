@@ -3,6 +3,8 @@ import { OrbitControls, ContactShadows } from "@react-three/drei";
 import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Planet } from "./Planet";
+import { TouchEffects } from "./TouchEffects";
+
 import { Clouds } from "./Clouds";
 import { Aurora } from "./Aurora";
 import { SunLight } from "./SunLight";
