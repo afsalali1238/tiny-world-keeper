@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import { useWorld } from "@/game/store";
 import type { ToolKind } from "@/game/types";
 
-const TOOLS: { kind: ToolKind; label: string; hint: string; icon: JSX.Element }[] = [
+const TOOLS: { kind: ToolKind; label: string; hint: string; icon: ReactNode }[] = [
   {
     kind: "rain",
     label: "Rain",
