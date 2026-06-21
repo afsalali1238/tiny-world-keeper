@@ -256,6 +256,8 @@ export const useWorld = create<WorldState & Actions>()(
         myths: s.myths,
         resolvedChoiceIds: s.resolvedChoiceIds,
         firedMythIds: s.firedMythIds,
+        audioOn: s.audioOn,
+        fifthFired: s.fifthFired,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
