@@ -35,6 +35,8 @@ interface Actions {
   markPivotFired: () => void;
   clearGlassMoment: () => void;
   clearRecentCombo: () => void;
+  setComboFirstSeen: () => void;
+
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
   reset: () => void;
@@ -336,6 +338,12 @@ export const useWorld = create<WorldState & Actions>()(
       clearGlassMoment: () => set({ glassMomentAt: null }),
 
       clearRecentCombo: () => set({ recentCombo: null }),
+
+      setComboFirstSeen: () => {
+        const s = get();
+        set({ flags: { ...s.flags, "combo:first-toast-seen": true } });
+      },
+
 
       clearOfflineGap: () => set({ offlineGapMs: null }),
 

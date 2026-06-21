@@ -111,6 +111,23 @@ export function AmbientAudio() {
     n.gain.gain.setTargetAtTime(0.5, ctx.currentTime, 1.2);
   }, [audioOn, intro]);
 
+  // Duck the bed while the narrator speaks.
+  useEffect(() => {
+    if (!audioOn || intro !== "done") return;
+    const unsub = useWorld.subscribe((s, prev) => {
+      const n = nodesRef.current;
+      const ctx = ctxRef.current;
+      if (!n || !ctx) return;
+      const speaking = !!s.currentNarration;
+      const wasSpeaking = !!prev.currentNarration;
+      if (speaking === wasSpeaking) return;
+      n.gain.gain.cancelScheduledValues(ctx.currentTime);
+      n.gain.gain.setTargetAtTime(speaking ? 0.18 : 0.5, ctx.currentTime, speaking ? 0.25 : 0.8);
+    });
+    return unsub;
+  }, [audioOn, intro]);
+
+
   useEffect(() => {
     return () => {
       const n = nodesRef.current;

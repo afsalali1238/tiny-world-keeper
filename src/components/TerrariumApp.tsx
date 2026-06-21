@@ -13,6 +13,8 @@ import { GlassOverlay } from "@/components/ui-overlay/GlassOverlay";
 import { OfflineCard } from "@/components/ui-overlay/OfflineCard";
 import { AmbientAudio } from "@/components/ui-overlay/AmbientAudio";
 import { Hints } from "@/components/ui-overlay/Hints";
+import { ComboFlash } from "@/components/ui-overlay/ComboFlash";
+
 import { useWorld } from "@/game/store";
 
 export function TerrariumApp() {
@@ -39,10 +41,11 @@ export function TerrariumApp() {
     <div className="relative h-screen w-screen overflow-hidden">
       <BackgroundDoodles />
       {mounted && (
-        <div className="absolute inset-0 z-10">
+        <div className="terrarium-canvas-filter absolute inset-0 z-10">
           <TerrariumScene />
         </div>
       )}
+
 
       {intro === "done" && (
         <>
@@ -60,6 +63,8 @@ export function TerrariumApp() {
           <OfflineCard />
           <AmbientAudio />
           <Hints />
+          <ComboFlash />
+
         </>
       )}
 
