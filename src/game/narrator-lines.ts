@@ -39,6 +39,12 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "idle-8", trigger: "idle", text: "There is a quarrel in one of the settlements. By the time we look again, it will be over. By the time we look again after that, it will be a song." },
   { id: "idle-9", trigger: "idle", text: "A clear day. The sort of day they will, eventually, build their religions around." },
   { id: "idle-10", trigger: "idle", text: "Notice how small they keep their lights. They do not yet know how dark the rest of the dark is." },
+  { id: "idle-11", trigger: "idle", text: "A funeral, in one of the older towns. The same words, more or less, that they used a thousand years ago. They are good words." },
+  { id: "idle-12", trigger: "idle", text: "A boy is teaching himself an instrument. He is not very good. Give him forty years." },
+  { id: "idle-13", trigger: "idle", text: "There is a season here for which they have no name. They will invent one, and forget it, and invent it again." },
+  { id: "idle-14", trigger: "idle", text: "Two people, on a bridge, in a city that does not yet have a name worth keeping. They are arguing softly about something neither will remember by morning." },
+  { id: "idle-15", trigger: "idle", text: "From this distance, their wars look like weather. From closer, of course, they do not." },
+  { id: "idle-16", trigger: "idle", text: "A library catches the late light. Inside, a single reader has just understood something. She will not be able to explain it for years." },
 
   // Rain.
   { id: "rain-1", trigger: "tool:rain", text: "A rain falls on the southern plain. In a hundred years, the people there will have a word for this kind of weather, and a song about who sent it." },
