@@ -2,6 +2,7 @@ export type Trait = "faith" | "curiosity" | "fear" | "harmony";
 export type Weather = "clear" | "rain" | "storm" | "aurora" | null;
 export type IntroStep = "gift" | "name" | "warm" | "water" | "life" | "done";
 export type ToolKind = "rain" | "sun" | "wind" | "seed";
+export type Speed = 0.5 | 1 | 4;
 
 export interface TouchEffect {
   id: number;
@@ -35,6 +36,16 @@ export interface WorldState {
   recentNarrationIds: string[];
   lastToolEvent: { kind: ToolKind; ts: number } | null;
   fifthFired: boolean;
+  // Pass A: tempo + curiosities
+  speed: Speed;
+  unlockedCuriosityIds: string[];
+  lastUnlockedCuriosity: { id: string; ts: number } | null;
+  // Pass C: pivot + glass + offline
+  playMs: number;
+  pivotFired: boolean;
+  glassMomentAt: number | null;
+  lastSeenAt: number | null;
+  offlineGapMs: number | null;
 }
 
 export interface MythEntry {
