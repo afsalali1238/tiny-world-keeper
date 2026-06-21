@@ -9,6 +9,10 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import "@fontsource/fraunces/400-italic.css";
+import "@fontsource/fraunces/500.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
