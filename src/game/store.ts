@@ -112,6 +112,11 @@ export const useWorld = create<WorldState & Actions>()(
           patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
         }
 
+        // age out touch effects (~2s lifespan)
+        const now = Date.now();
+        const liveEffects = s.effects.filter((e) => now - e.bornAt < 2000);
+        if (liveEffects.length !== s.effects.length) patch.effects = liveEffects;
+
         set(patch);
         get().surfaceChoiceIfReady();
       },
@@ -123,7 +128,7 @@ export const useWorld = create<WorldState & Actions>()(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
         if (!eligible.length) return;
-        if (Math.random() > 0.35) return;
+        if (Math.random() > 0.08) return; // rare event, not a steady drumbeat
         const pick = eligible[Math.floor(Math.random() * eligible.length)];
         set({ activeChoiceId: pick.id });
       },
