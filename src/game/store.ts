@@ -5,6 +5,12 @@ import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
 
+export interface NarrationCue {
+  id: string;
+  text: string;
+  bornAt: number;
+}
+
 interface Actions {
   setIntro: (step: WorldState["intro"]) => void;
   setPlanetName: (name: string) => void;
@@ -17,6 +23,10 @@ interface Actions {
   godAction: (kind: "rain" | "sign" | "withhold") => void;
   setTool: (tool: ToolKind | null) => void;
   applyToolAt: (pos: [number, number, number]) => void;
+  setAudio: (on: boolean) => void;
+  narrate: (cue: NarrationCue) => void;
+  clearNarration: () => void;
+  markFifthFired: () => void;
   reset: () => void;
 }
 
@@ -40,6 +50,11 @@ const initialWorld: WorldState = {
   firedMythIds: [],
   selectedTool: null,
   effects: [],
+  audioOn: false,
+  currentNarration: null,
+  recentNarrationIds: [],
+  lastToolEvent: null,
+  fifthFired: false,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -187,7 +202,10 @@ export const useWorld = create<WorldState & Actions>()(
         if (!tool) return;
         const effect: TouchEffect = { id: effectId++, kind: tool, pos, bornAt: Date.now() };
         const effects = [...s.effects, effect].slice(-12);
-        const patch: Partial<WorldState> = { effects };
+        const patch: Partial<WorldState> = {
+          effects,
+          lastToolEvent: { kind: tool, ts: Date.now() },
+        };
         if (tool === "rain") {
           patch.water = clamp(s.water + 0.04);
           patch.weather = "rain";
@@ -201,6 +219,20 @@ export const useWorld = create<WorldState & Actions>()(
         }
         set(patch);
       },
+
+      setAudio: (audioOn) => set({ audioOn }),
+
+      narrate: (cue) => {
+        const s = get();
+        set({
+          currentNarration: cue,
+          recentNarrationIds: [cue.id, ...s.recentNarrationIds].slice(0, 6),
+        });
+      },
+
+      clearNarration: () => set({ currentNarration: null }),
+
+      markFifthFired: () => set({ fifthFired: true }),
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
@@ -224,6 +256,8 @@ export const useWorld = create<WorldState & Actions>()(
         myths: s.myths,
         resolvedChoiceIds: s.resolvedChoiceIds,
         firedMythIds: s.firedMythIds,
+        audioOn: s.audioOn,
+        fifthFired: s.fifthFired,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

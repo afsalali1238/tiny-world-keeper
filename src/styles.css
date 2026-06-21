@@ -111,3 +111,18 @@
   from { transform: translateY(-6px) rotate(0deg); }
   to   { transform: translateY(8px) rotate(8deg); }
 }
+
+@keyframes terrarium-narrate-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  18%  { opacity: 1; transform: translateY(0); }
+  88%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+.terrarium-narrate {
+  animation-name: terrarium-narrate-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+  color: var(--cream);
+}
+
+

@@ -5,6 +5,7 @@ import { EraRibbon, LivingPulse, MenuCorner } from "@/components/ui-overlay/HUD"
 import { ChoiceCard } from "@/components/ui-overlay/ChoiceCard";
 import { MythFeed } from "@/components/ui-overlay/MythFeed";
 import { ToolDock } from "@/components/ui-overlay/ToolDock";
+import { Narrator } from "@/components/ui-overlay/Narrator";
 import { BackgroundDoodles } from "@/components/ui-overlay/BackgroundDoodles";
 import { useWorld } from "@/game/store";
 
@@ -30,6 +31,7 @@ export function TerrariumApp() {
           <MythFeed />
           <ChoiceCard />
           <ToolDock />
+          <Narrator />
         </>
       )}
 
