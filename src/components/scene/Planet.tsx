@@ -101,7 +101,8 @@ export function Planet({ cold = false }: Props) {
   const showAtmo = !cold && intro !== "gift";
 
   const handlePlanetDown = (e: ThreeEvent<PointerEvent>) => {
-    if (!selectedTool || intro !== "done") return;
+    if (!selectedTool) return;
+    if (intro === "gift" || intro === "name" || intro === "pour") return;
     e.stopPropagation();
     const local = e.point.clone();
     if (planetRef.current) planetRef.current.worldToLocal(local);
