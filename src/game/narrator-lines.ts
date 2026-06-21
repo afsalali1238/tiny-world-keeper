@@ -56,6 +56,7 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "wind-1", trigger: "tool:wind", text: "A wind crosses the world. Seeds travel with it. So do stories." },
   { id: "wind-2", trigger: "tool:wind", text: "The clouds are moved. To them, this is weather. To us, it is a hand." },
   { id: "wind-3", trigger: "tool:wind", text: "Sailors take it as a sign. They are nearly always wrong about which sign, and nearly always grateful." },
+  { id: "wind-4", trigger: "tool:wind", text: "A kite, somewhere. A child, somewhere. The wind does not care which, but the child does." },
 
   // Seed.
   { id: "seed-1", trigger: "tool:seed", text: "A small green begins where none was before. In a hundred summers, it will be a wood. In a thousand, a country." },
