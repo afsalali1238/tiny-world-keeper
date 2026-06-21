@@ -318,6 +318,18 @@ export const useWorld = create<WorldState & Actions>()(
     {
       name: "terrarium:v1",
       version: 2,
+      migrate: (persisted: unknown, _version: number) => {
+        // Old saves (v1) didn't have the new fields; merge defaults forward.
+        const p = (persisted ?? {}) as Partial<WorldState>;
+        return {
+          ...p,
+          speed: p.speed ?? 1,
+          unlockedCuriosityIds: p.unlockedCuriosityIds ?? [],
+          playMs: p.playMs ?? 0,
+          pivotFired: p.pivotFired ?? false,
+          lastSeenAt: p.lastSeenAt ?? null,
+        } as WorldState;
+      },
       partialize: (s) => ({
         planetName: s.planetName,
         seed: s.seed,
