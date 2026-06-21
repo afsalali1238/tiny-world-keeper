@@ -127,7 +127,7 @@ export const useWorld = create<WorldState & Actions>()(
       setIntro: (intro) => set({ intro }),
       setPlanetName: (planetName) => {
         rememberKeeper(planetName);
-        set({ planetName, intro: "spray" });
+        set({ planetName, intro: "spray", selectedTool: "rain", warmth: 0, water: 0, life: 0 });
       },
 
       // Legacy intro actions (kept for backward compat; new flow uses tool taps).
