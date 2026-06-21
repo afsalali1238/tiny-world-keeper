@@ -14,7 +14,7 @@ export function CuriosityToast() {
   const c = CURIOSITY_BY_ID[last.id];
   if (!c) return null;
   return (
-    <div className="pointer-events-none absolute bottom-28 right-6 z-30 max-w-xs">
+    <div className="pointer-events-none absolute top-24 right-5 z-30 max-w-[18rem] md:bottom-28 md:right-6 md:top-auto">
       <div className="terrarium-rise rounded-2xl bg-card/90 px-4 py-3 backdrop-blur shadow-sm">
         <p className="font-serif text-[10px] uppercase tracking-[0.28em] text-foreground/45">
           ✦  a curiosity recorded
@@ -36,15 +36,19 @@ export function CuriosityPanel() {
   const count = unlocked.length;
   const total = CURIOSITIES.length;
 
+  const hasUnseen = !!useWorld((s) => s.lastUnlockedCuriosity);
+
   return (
     <>
       <button
         onClick={() => setOpen(true)}
         title="curiosities"
-        className="pointer-events-auto absolute left-5 bottom-5 z-20 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
       >
-        ✦ {count} / {total}
+        <span>✦ {count} / {total}</span>
+        {hasUnseen && <span className="terrarium-pulse h-1.5 w-1.5 rounded-full bg-accent" />}
       </button>
+
 
       {open && (
         <div

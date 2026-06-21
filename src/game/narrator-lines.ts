@@ -39,6 +39,12 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "idle-8", trigger: "idle", text: "There is a quarrel in one of the settlements. By the time we look again, it will be over. By the time we look again after that, it will be a song." },
   { id: "idle-9", trigger: "idle", text: "A clear day. The sort of day they will, eventually, build their religions around." },
   { id: "idle-10", trigger: "idle", text: "Notice how small they keep their lights. They do not yet know how dark the rest of the dark is." },
+  { id: "idle-11", trigger: "idle", text: "A funeral, in one of the older towns. The same words, more or less, that they used a thousand years ago. They are good words." },
+  { id: "idle-12", trigger: "idle", text: "A boy is teaching himself an instrument. He is not very good. Give him forty years." },
+  { id: "idle-13", trigger: "idle", text: "There is a season here for which they have no name. They will invent one, and forget it, and invent it again." },
+  { id: "idle-14", trigger: "idle", text: "Two people, on a bridge, in a city that does not yet have a name worth keeping. They are arguing softly about something neither will remember by morning." },
+  { id: "idle-15", trigger: "idle", text: "From this distance, their wars look like weather. From closer, of course, they do not." },
+  { id: "idle-16", trigger: "idle", text: "A library catches the late light. Inside, a single reader has just understood something. She will not be able to explain it for years." },
 
   // Rain.
   { id: "rain-1", trigger: "tool:rain", text: "A rain falls on the southern plain. In a hundred years, the people there will have a word for this kind of weather, and a song about who sent it." },
@@ -56,6 +62,7 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "wind-1", trigger: "tool:wind", text: "A wind crosses the world. Seeds travel with it. So do stories." },
   { id: "wind-2", trigger: "tool:wind", text: "The clouds are moved. To them, this is weather. To us, it is a hand." },
   { id: "wind-3", trigger: "tool:wind", text: "Sailors take it as a sign. They are nearly always wrong about which sign, and nearly always grateful." },
+  { id: "wind-4", trigger: "tool:wind", text: "A kite, somewhere. A child, somewhere. The wind does not care which, but the child does." },
 
   // Seed.
   { id: "seed-1", trigger: "tool:seed", text: "A small green begins where none was before. In a hundred summers, it will be a wood. In a thousand, a country." },
@@ -67,6 +74,8 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "era-1", trigger: "era", text: "An age ends here. The next has already begun, though no one inside the world will notice for some time." },
   { id: "era-2", trigger: "era", text: "They are becoming something new. Their grandparents would not recognise them. Their grandchildren will not recognise us." },
   { id: "era-3", trigger: "era", text: "A century closes. The histories will say it ended on a specific day. It did not." },
+  { id: "era-4", trigger: "era", text: "Something has shifted. They cannot point to it. We can, and we will not." },
+  { id: "era-5", trigger: "era", text: "An age, ending. The first generation of the next age has already been born and given names that will sound old by the time they are old." },
 
   // Life rises.
   { id: "life-1", trigger: "lifeRise", text: "The settlements are growing now. From up here, they look like small constellations, drawn quietly into being." },
@@ -82,6 +91,8 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "uncanny-2", trigger: "uncanny", text: "Notice the shape of the small fires in the north. Read from above, they almost spell a question." },
   { id: "uncanny-3", trigger: "uncanny", text: "And in some quiet room of their making, a child has begun to build a tiny world of their own. They are not sure why." },
   { id: "uncanny-4", trigger: "uncanny", text: "Their best mathematicians, in late evenings, in quiet rooms, are beginning to suspect that the numbers prefer round figures." },
+  { id: "uncanny-5", trigger: "uncanny", text: "A scholar, in a country we have not yet noticed, has written a thin book asking whether the sky is being watched from the other side." },
+  { id: "uncanny-6", trigger: "uncanny", text: "There is a word, in three of their languages now, for the feeling of being observed without menace. It is a new word." },
 
   // Pivot.
   { id: "pivot-1", trigger: "pivot", text: "The keeper has not moved in some time. The people have started to wonder if the keeper is also being watched." },

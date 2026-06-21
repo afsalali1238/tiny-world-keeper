@@ -22,7 +22,7 @@ const HINTS: Hint[] = [
   {
     id: "speed",
     text: "time has a dial",
-    position: "top-20 right-20",
+    position: "top-32 right-16",
     delayMs: 30_000,
     show: (s) => s.intro === "done" && s.speed === 1,
   },
