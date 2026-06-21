@@ -11,6 +11,8 @@ import { SpeedDial } from "@/components/ui-overlay/SpeedDial";
 import { CuriosityPanel, CuriosityToast } from "@/components/ui-overlay/CuriosityPanel";
 import { GlassOverlay } from "@/components/ui-overlay/GlassOverlay";
 import { OfflineCard } from "@/components/ui-overlay/OfflineCard";
+import { AmbientAudio } from "@/components/ui-overlay/AmbientAudio";
+import { Hints } from "@/components/ui-overlay/Hints";
 import { useWorld } from "@/game/store";
 
 export function TerrariumApp() {
@@ -56,6 +58,8 @@ export function TerrariumApp() {
           <Narrator />
           <GlassOverlay />
           <OfflineCard />
+          <AmbientAudio />
+          <Hints />
         </>
       )}
 
