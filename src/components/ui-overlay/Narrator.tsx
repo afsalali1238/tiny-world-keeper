@@ -143,6 +143,24 @@ export function Narrator() {
       }
     }, 6000);
 
+    // The Pivot: one-shot, fires once playMs crosses ~25 minutes.
+    const PIVOT_MS = 25 * 60_000;
+    const pivotTimer = setInterval(() => {
+      const s = useWorld.getState();
+      if (s.pivotFired) {
+        clearInterval(pivotTimer);
+        return;
+      }
+      if (s.activeChoiceId || s.currentNarration) return;
+      if (s.playMs < PIVOT_MS) return;
+      const line = pickLine("pivot", []);
+      if (!line) return;
+      lastNarratedAt = Date.now();
+      useWorld.getState().narrate({ id: line.id, text: line.text, bornAt: Date.now() });
+      useWorld.getState().markPivotFired();
+      clearInterval(pivotTimer);
+    }, 8000);
+
     const unsub = useWorld.subscribe((s) => {
       // tool used
       const ts = s.lastToolEvent?.ts ?? 0;
@@ -180,6 +198,7 @@ export function Narrator() {
       clearInterval(idleTimer);
       clearTimeout(fifthTimer);
       clearTimeout(introTimer);
+      clearInterval(pivotTimer);
     };
   }, [intro]);
 

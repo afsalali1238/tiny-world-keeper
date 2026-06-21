@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Planet } from "./Planet";
 import { Clouds } from "./Clouds";
@@ -11,7 +11,29 @@ import { BACKGROUND_TEAL } from "@/game/toon-gradient";
 
 function TickDriver() {
   const tick = useWorld((s) => s.tick);
-  useFrame((_, dt) => tick(dt));
+  useFrame((_, dt) => {
+    const speed = useWorld.getState().speed;
+    tick(dt * speed);
+  });
+  return null;
+}
+
+function GlassCamera() {
+  const { camera } = useThree();
+  const baseZ = useRef(camera.position.z);
+  useFrame(() => {
+    const at = useWorld.getState().glassMomentAt;
+    if (!at) {
+      // ease back to base
+      camera.position.z += (baseZ.current - camera.position.z) * 0.06;
+      return;
+    }
+    const t = (Date.now() - at) / 2600; // 0..1 over duration
+    // pull back then return: a bell curve
+    const pull = Math.sin(Math.min(1, Math.max(0, t)) * Math.PI);
+    const target = baseZ.current + pull * 2.6;
+    camera.position.z += (target - camera.position.z) * 0.15;
+  });
   return null;
 }
 
@@ -47,6 +69,7 @@ export function TerrariumScene() {
           rotateSpeed={0.6}
         />
         <TickDriver />
+        <GlassCamera />
       </Suspense>
     </Canvas>
   );
