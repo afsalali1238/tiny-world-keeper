@@ -1,0 +1,212 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { ChoiceOption, MythEntry, WorldState } from "./types";
+import { ageNameForEra, ERAS } from "./eras";
+import { CHOICE_CARDS } from "./choices";
+import { MYTH_LIBRARY } from "./myths";
+
+interface Actions {
+  setIntro: (step: WorldState["intro"]) => void;
+  setPlanetName: (name: string) => void;
+  breatheWarmth: () => void;
+  letItRain: () => void;
+  plantSpark: () => void;
+  tick: (dt: number) => void;
+  surfaceChoiceIfReady: () => void;
+  resolveChoice: (option: ChoiceOption) => void;
+  godAction: (kind: "rain" | "sign" | "withhold") => void;
+  reset: () => void;
+}
+
+const initialWorld: WorldState = {
+  planetName: "",
+  seed: Math.floor(Math.random() * 100000),
+  era: 0,
+  ageName: ERAS[0].name,
+  warmth: 0,
+  water: 0,
+  life: 0,
+  traits: { faith: 0, curiosity: 0, fear: 0, harmony: 0 },
+  weather: null,
+  flags: {},
+  session: 0,
+  intro: "gift",
+  ticks: 0,
+  myths: [],
+  activeChoiceId: null,
+  resolvedChoiceIds: [],
+  firedMythIds: [],
+};
+
+const clamp = (n: number) => Math.max(0, Math.min(1, n));
+
+let tickAccumulator = 0;
+let choiceCooldown = 0;
+
+function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
+  if (state.firedMythIds.includes(mythId)) return {};
+  const template = MYTH_LIBRARY[mythId];
+  if (!template) return {};
+  const entry: MythEntry = {
+    ...template,
+    era: state.era,
+    createdAt: Date.now(),
+  };
+  return {
+    myths: [entry, ...state.myths].slice(0, 30),
+    firedMythIds: [...state.firedMythIds, mythId],
+  };
+}
+
+export const useWorld = create<WorldState & Actions>()(
+  persist(
+    (set, get) => ({
+      ...initialWorld,
+
+      setIntro: (intro) => set({ intro }),
+      setPlanetName: (planetName) => set({ planetName, intro: "warm" }),
+
+      breatheWarmth: () => set({ warmth: 0.7, intro: "water" }),
+      letItRain: () => set({ water: 0.8, weather: "rain", intro: "life" }),
+      plantSpark: () =>
+        set({ life: 0.12, weather: "clear", intro: "done", ageName: ERAS[0].name }),
+
+      tick: (dt) => {
+        const s = get();
+        if (s.intro !== "done") return;
+
+        tickAccumulator += dt;
+        choiceCooldown = Math.max(0, choiceCooldown - dt);
+        if (tickAccumulator < 0.25) return;
+        tickAccumulator = 0;
+
+        const ticks = s.ticks + 1;
+        const life = clamp(s.life + 0.0025);
+
+        // era advancement
+        let era = s.era;
+        let acc = 0;
+        for (let i = 0; i < ERAS.length; i++) {
+          acc += ERAS[i].durationTicks;
+          if (ticks < acc) {
+            era = i;
+            break;
+          }
+          era = i;
+        }
+        const ageName = ageNameForEra(era);
+
+        // weather decay
+        let weather = s.weather;
+        if (weather && weather !== "clear" && Math.random() < 0.01) weather = "clear";
+
+        let patch: Partial<WorldState> = { ticks, life, era, ageName, weather };
+
+        // guaranteed creation myth on entering era 3 (index 2)
+        if (era >= 2 && !s.firedMythIds.includes("creation")) {
+          patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
+        }
+
+        set(patch);
+        get().surfaceChoiceIfReady();
+      },
+
+      surfaceChoiceIfReady: () => {
+        const s = get();
+        if (s.activeChoiceId || s.intro !== "done" || choiceCooldown > 0) return;
+        const eligible = CHOICE_CARDS.filter(
+          (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
+        );
+        if (!eligible.length) return;
+        if (Math.random() > 0.35) return;
+        const pick = eligible[Math.floor(Math.random() * eligible.length)];
+        set({ activeChoiceId: pick.id });
+      },
+
+      resolveChoice: (option) => {
+        const s = get();
+        const id = s.activeChoiceId;
+        if (!id) return;
+        const traits = { ...s.traits };
+        for (const [k, v] of Object.entries(option.effects ?? {})) {
+          const key = k as keyof typeof traits;
+          traits[key] = clamp(traits[key] + (v ?? 0));
+        }
+        let patch: Partial<WorldState> = {
+          traits,
+          activeChoiceId: null,
+          resolvedChoiceIds: [...s.resolvedChoiceIds, id],
+          ...(option.world ?? {}),
+        };
+        if (option.world?.life !== undefined) {
+          patch.life = clamp(s.life + option.world.life);
+        }
+        if (option.world?.warmth !== undefined) {
+          patch.warmth = clamp(s.warmth + option.world.warmth);
+        }
+        if (option.world?.water !== undefined) {
+          patch.water = clamp(s.water + option.world.water);
+        }
+        if (option.setFlag) {
+          patch.flags = { ...s.flags, [option.setFlag]: true };
+        }
+        if (option.mythId) {
+          patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, option.mythId) };
+        }
+        choiceCooldown = 8;
+        set(patch);
+      },
+
+      godAction: (kind) => {
+        const s = get();
+        if (kind === "rain") {
+          set({ weather: "rain" });
+        } else if (kind === "sign") {
+          set({ weather: "aurora" });
+          set(addMyth(s, "cometSign"));
+        } else if (kind === "withhold") {
+          set(addMyth(s, "withheld"));
+        }
+      },
+
+      reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
+    }),
+    {
+      name: "terrarium:v1",
+      version: 1,
+      partialize: (s) => ({
+        planetName: s.planetName,
+        seed: s.seed,
+        era: s.era,
+        ageName: s.ageName,
+        warmth: s.warmth,
+        water: s.water,
+        life: s.life,
+        traits: s.traits,
+        weather: s.weather,
+        flags: s.flags,
+        session: s.session,
+        intro: s.intro,
+        ticks: s.ticks,
+        myths: s.myths,
+        resolvedChoiceIds: s.resolvedChoiceIds,
+        firedMythIds: s.firedMythIds,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.session = (state.session ?? 0) + 1;
+          state.activeChoiceId = null;
+        }
+      },
+    },
+  ),
+);
+
+export function lifeLabel(life: number): string {
+  if (life < 0.05) return "a quiet seed";
+  if (life < 0.2) return "a stirring world";
+  if (life < 0.45) return "a small civilization";
+  if (life < 0.7) return "a thriving world";
+  if (life < 0.9) return "a humming world";
+  return "a world of many lights";
+}
