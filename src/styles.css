@@ -132,5 +132,12 @@
   100% { opacity: 0; }
 }
 
+@keyframes terrarium-combo-flash {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
 
 
