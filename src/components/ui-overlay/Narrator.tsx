@@ -213,7 +213,7 @@ export function Narrator() {
       }
     }, 6000);
 
-    const introTimer = setTimeout(() => fire("idle", { allowUncannyDraft: false, allowEchoDraft: false }), 4000);
+    const introTimer = setTimeout(() => fire("idle", { allowUncannyDraft: false, allowEchoDraft: false, minGapOverride: 0 }), 900);
 
     return () => {
       unsub();
