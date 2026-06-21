@@ -139,8 +139,8 @@ export function Planet({ cold = false }: Props) {
         </mesh>
       )}
 
-      {intro === "done" && <Diorama geom={geom} />}
-      {intro === "done" && <TouchEffects />}
+      {intro !== "gift" && intro !== "name" && <Diorama geom={geom} />}
+      {intro !== "gift" && intro !== "name" && <TouchEffects />}
     </group>
   );
 }
