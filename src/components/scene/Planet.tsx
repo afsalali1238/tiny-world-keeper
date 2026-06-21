@@ -1,10 +1,11 @@
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { buildPlanetGeometry } from "@/game/planet-geometry";
 import { useWorld } from "@/game/store";
 import { getToonGradient, INK } from "@/game/toon-gradient";
 import { Diorama } from "./Diorama";
+import { TouchEffects } from "./TouchEffects";
 
 interface Props {
   cold?: boolean;
@@ -15,6 +16,8 @@ export function Planet({ cold = false }: Props) {
   const warmth = useWorld((s) => s.warmth);
   const water = useWorld((s) => s.water);
   const intro = useWorld((s) => s.intro);
+  const selectedTool = useWorld((s) => s.selectedTool);
+  const applyToolAt = useWorld((s) => s.applyToolAt);
 
   const geom = useMemo(() => buildPlanetGeometry(seed), [seed]);
   const groupRef = useRef<THREE.Group>(null);
@@ -75,6 +78,14 @@ export function Planet({ cold = false }: Props) {
 
   const showAtmo = !cold && intro !== "gift";
 
+  const handlePlanetDown = (e: ThreeEvent<PointerEvent>) => {
+    if (!selectedTool || intro !== "done") return;
+    e.stopPropagation();
+    const local = e.point.clone();
+    if (planetRef.current) planetRef.current.worldToLocal(local);
+    applyToolAt([local.x, local.y, local.z]);
+  };
+
   return (
     <group ref={groupRef}>
       {/* outline (inverted hull) */}
@@ -83,7 +94,13 @@ export function Planet({ cold = false }: Props) {
       </mesh>
 
       {/* planet surface with toon shading */}
-      <mesh ref={planetRef} geometry={geom} castShadow receiveShadow>
+      <mesh
+        ref={planetRef}
+        geometry={geom}
+        castShadow
+        receiveShadow
+        onPointerDown={handlePlanetDown}
+      >
         <meshToonMaterial vertexColors gradientMap={gradient} />
       </mesh>
 
@@ -101,6 +118,7 @@ export function Planet({ cold = false }: Props) {
       )}
 
       {intro === "done" && <Diorama geom={geom} />}
+      {intro === "done" && <TouchEffects />}
     </group>
   );
 }

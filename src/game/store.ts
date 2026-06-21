@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ChoiceOption, MythEntry, WorldState } from "./types";
+import type { ChoiceOption, MythEntry, ToolKind, TouchEffect, WorldState } from "./types";
 import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
@@ -15,6 +15,8 @@ interface Actions {
   surfaceChoiceIfReady: () => void;
   resolveChoice: (option: ChoiceOption) => void;
   godAction: (kind: "rain" | "sign" | "withhold") => void;
+  setTool: (tool: ToolKind | null) => void;
+  applyToolAt: (pos: [number, number, number]) => void;
   reset: () => void;
 }
 
@@ -36,12 +38,15 @@ const initialWorld: WorldState = {
   activeChoiceId: null,
   resolvedChoiceIds: [],
   firedMythIds: [],
+  selectedTool: null,
+  effects: [],
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
 let tickAccumulator = 0;
-let choiceCooldown = 0;
+let choiceCooldown = 30; // start gently: no choices for the first ~30s
+let effectId = 1;
 
 function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
   if (state.firedMythIds.includes(mythId)) return {};
@@ -107,6 +112,11 @@ export const useWorld = create<WorldState & Actions>()(
           patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
         }
 
+        // age out touch effects (~2s lifespan)
+        const now = Date.now();
+        const liveEffects = s.effects.filter((e) => now - e.bornAt < 2000);
+        if (liveEffects.length !== s.effects.length) patch.effects = liveEffects;
+
         set(patch);
         get().surfaceChoiceIfReady();
       },
@@ -118,7 +128,7 @@ export const useWorld = create<WorldState & Actions>()(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
         if (!eligible.length) return;
-        if (Math.random() > 0.35) return;
+        if (Math.random() > 0.08) return; // rare event, not a steady drumbeat
         const pick = eligible[Math.floor(Math.random() * eligible.length)];
         set({ activeChoiceId: pick.id });
       },
@@ -167,6 +177,29 @@ export const useWorld = create<WorldState & Actions>()(
         } else if (kind === "withhold") {
           set(addMyth(s, "withheld"));
         }
+      },
+
+      setTool: (selectedTool) => set({ selectedTool }),
+
+      applyToolAt: (pos) => {
+        const s = get();
+        const tool = s.selectedTool;
+        if (!tool) return;
+        const effect: TouchEffect = { id: effectId++, kind: tool, pos, bornAt: Date.now() };
+        const effects = [...s.effects, effect].slice(-12);
+        const patch: Partial<WorldState> = { effects };
+        if (tool === "rain") {
+          patch.water = clamp(s.water + 0.04);
+          patch.weather = "rain";
+        } else if (tool === "sun") {
+          patch.warmth = clamp(s.warmth + 0.04);
+          patch.weather = "clear";
+        } else if (tool === "wind") {
+          patch.weather = "clear";
+        } else if (tool === "seed") {
+          patch.life = clamp(s.life + 0.015);
+        }
+        set(patch);
       },
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
