@@ -68,7 +68,10 @@ export function TerrariumScene() {
         <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
         <OrbitControls
           enablePan={false}
-          enableZoom={false}
+          enableZoom={true}
+          minDistance={1.6}
+          maxDistance={4.5}
+          zoomSpeed={0.6}
           enableDamping
           dampingFactor={0.08}
           rotateSpeed={0.6}
