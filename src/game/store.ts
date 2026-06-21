@@ -5,6 +5,8 @@ import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
 import { CURIOSITIES } from "./curiosities";
+import { detectCombo } from "./combos";
+import { rememberKeeper } from "./keepers";
 
 export interface NarrationCue {
   id: string;
@@ -32,6 +34,7 @@ interface Actions {
   ackCuriosityToast: () => void;
   markPivotFired: () => void;
   clearGlassMoment: () => void;
+  clearRecentCombo: () => void;
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
   reset: () => void;
@@ -70,6 +73,7 @@ const initialWorld: WorldState = {
   glassMomentAt: null,
   lastSeenAt: null,
   offlineGapMs: null,
+  recentCombo: null,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -77,6 +81,7 @@ const clamp = (n: number) => Math.max(0, Math.min(1, n));
 let tickAccumulator = 0;
 let choiceCooldown = 30;
 let effectId = 1;
+let comboMemory = { lastTool: null as ToolKind | null, lastToolTs: 0, sunStreak: { count: 0, lastTs: 0 } };
 
 function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
   if (state.firedMythIds.includes(mythId)) return {};
@@ -117,7 +122,10 @@ export const useWorld = create<WorldState & Actions>()(
       ...initialWorld,
 
       setIntro: (intro) => set({ intro }),
-      setPlanetName: (planetName) => set({ planetName, intro: "warm" }),
+      setPlanetName: (planetName) => {
+        rememberKeeper(planetName);
+        set({ planetName, intro: "warm" });
+      },
 
       breatheWarmth: () => set({ warmth: 0.7, intro: "water" }),
       letItRain: () => set({ water: 0.8, weather: "rain", intro: "life" }),
@@ -260,15 +268,20 @@ export const useWorld = create<WorldState & Actions>()(
         const effects = [...s.effects, effect].slice(-12);
         const flags = { ...s.flags, [`used:${tool}`]: true };
 
-        // Steam combo: rain on a warm/sunlit world.
-        if (tool === "rain" && s.warmth > 0.6) {
-          flags["combo:steam"] = true;
+        // Combo detection.
+        const { hit, mem } = detectCombo(tool, s, comboMemory);
+        comboMemory = mem;
+        let recentCombo = s.recentCombo;
+        if (hit) {
+          flags[hit.flag] = true;
+          recentCombo = { kind: hit.kind, ts: Date.now() };
         }
 
         const patch: Partial<WorldState> = {
           effects,
           flags,
           lastToolEvent: { kind: tool, ts: Date.now() },
+          recentCombo,
         };
         if (tool === "rain") {
           patch.water = clamp(s.water + 0.04);
@@ -280,6 +293,15 @@ export const useWorld = create<WorldState & Actions>()(
           patch.weather = "clear";
         } else if (tool === "seed") {
           patch.life = clamp(s.life + 0.015);
+        }
+        // Combo aftermath.
+        if (hit?.kind === "bloom") {
+          patch.life = clamp((patch.life ?? s.life) + 0.04);
+        } else if (hit?.kind === "drought") {
+          patch.life = clamp((patch.life ?? s.life) - 0.03);
+          patch.water = clamp(s.water - 0.15);
+        } else if (hit?.kind === "steam") {
+          patch.weather = "aurora";
         }
         set(patch);
       },
@@ -308,6 +330,8 @@ export const useWorld = create<WorldState & Actions>()(
       },
 
       clearGlassMoment: () => set({ glassMomentAt: null }),
+
+      clearRecentCombo: () => set({ recentCombo: null }),
 
       clearOfflineGap: () => set({ offlineGapMs: null }),
 

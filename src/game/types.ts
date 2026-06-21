@@ -46,6 +46,8 @@ export interface WorldState {
   glassMomentAt: number | null;
   lastSeenAt: number | null;
   offlineGapMs: number | null;
+  // Consequence pack
+  recentCombo: { kind: "steam" | "bloom" | "drought" | "exodus"; ts: number } | null;
 }
 
 export interface MythEntry {

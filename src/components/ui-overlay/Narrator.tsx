@@ -6,6 +6,7 @@ import {
   type NarratorLine,
   type NarratorTrigger,
 } from "@/game/narrator-lines";
+import { priorKeeper } from "@/game/keepers";
 
 const MIN_GAP_MS = 26_000; // calm pacing between lines
 
@@ -110,20 +111,33 @@ export function Narrator() {
     let prevEra = useWorld.getState().era;
     let prevBand = lifeBand(useWorld.getState().life);
     let prevToolTs = useWorld.getState().lastToolEvent?.ts ?? 0;
+    let prevComboTs = useWorld.getState().recentCombo?.ts ?? 0;
 
-    const fire = (trigger: NarratorTrigger, allowUncannyDraft = true) => {
+    const fire = (trigger: NarratorTrigger, opts?: { allowUncannyDraft?: boolean; allowEchoDraft?: boolean; minGapOverride?: number }) => {
       const s = useWorld.getState();
       const now = Date.now();
       if (s.activeChoiceId) return;
-      if (now - lastNarratedAt < MIN_GAP_MS) return;
-      // 8% chance to substitute an uncanny line on certain triggers, after session 2
+      const gap = opts?.minGapOverride ?? MIN_GAP_MS;
+      if (now - lastNarratedAt < gap) return;
+
       let chosen: NarratorLine | null = null;
       const canUncanny =
-        allowUncannyDraft &&
+        (opts?.allowUncannyDraft ?? true) &&
         s.session >= 2 &&
         (trigger === "idle" || trigger === "lifeRise" || trigger === "era") &&
         Math.random() < 0.08;
       if (canUncanny) chosen = pickLine("uncanny", s.recentNarrationIds);
+
+      // Echo: rare on idle, only when a prior keeper exists.
+      let echoName: string | null = null;
+      if (!chosen && (opts?.allowEchoDraft ?? true) && trigger === "idle" && Math.random() < 0.18) {
+        echoName = priorKeeper(s.planetName);
+        if (echoName) {
+          const line = pickLine("echo", s.recentNarrationIds);
+          if (line) chosen = { ...line, text: line.text.replaceAll("{NAME}", echoName) };
+        }
+      }
+
       if (!chosen) chosen = pickLine(trigger, s.recentNarrationIds);
       if (!chosen) return;
       lastNarratedAt = now;
@@ -162,19 +176,29 @@ export function Narrator() {
     }, 8000);
 
     const unsub = useWorld.subscribe((s) => {
+      // combo wins over tool line (it's the more interesting beat).
+      const cTs = s.recentCombo?.ts ?? 0;
+      if (cTs !== prevComboTs && s.recentCombo) {
+        prevComboTs = cTs;
+        lastInteractedAt = cTs;
+        fire(`combo:${s.recentCombo.kind}` as NarratorTrigger, {
+          allowUncannyDraft: false,
+          allowEchoDraft: false,
+          minGapOverride: 8000,
+        });
+        return;
+      }
       // tool used
       const ts = s.lastToolEvent?.ts ?? 0;
       if (ts !== prevToolTs && s.lastToolEvent) {
         prevToolTs = ts;
         lastInteractedAt = ts;
-        fire(TRIGGER_FROM_TOOL[s.lastToolEvent.kind], false);
+        fire(TRIGGER_FROM_TOOL[s.lastToolEvent.kind], { allowUncannyDraft: false });
       }
-      // era crossed
       if (s.era !== prevEra) {
         prevEra = s.era;
         fire("era");
       }
-      // life band crossed
       const band = lifeBand(s.life);
       if (band !== prevBand) {
         prevBand = band;
@@ -182,7 +206,6 @@ export function Narrator() {
       }
     });
 
-    // Idle pulse.
     const idleTimer = setInterval(() => {
       const now = Date.now();
       if (now - lastInteractedAt > 22_000 && now - lastNarratedAt > 38_000) {
@@ -190,8 +213,7 @@ export function Narrator() {
       }
     }, 6000);
 
-    // first welcome ~4s after intro ends
-    const introTimer = setTimeout(() => fire("idle", false), 4000);
+    const introTimer = setTimeout(() => fire("idle", { allowUncannyDraft: false, allowEchoDraft: false }), 4000);
 
     return () => {
       unsub();
