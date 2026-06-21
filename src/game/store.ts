@@ -179,6 +179,29 @@ export const useWorld = create<WorldState & Actions>()(
         }
       },
 
+      setTool: (selectedTool) => set({ selectedTool }),
+
+      applyToolAt: (pos) => {
+        const s = get();
+        const tool = s.selectedTool;
+        if (!tool) return;
+        const effect: TouchEffect = { id: effectId++, kind: tool, pos, bornAt: Date.now() };
+        const effects = [...s.effects, effect].slice(-12);
+        const patch: Partial<WorldState> = { effects };
+        if (tool === "rain") {
+          patch.water = clamp(s.water + 0.04);
+          patch.weather = "rain";
+        } else if (tool === "sun") {
+          patch.warmth = clamp(s.warmth + 0.04);
+          patch.weather = "clear";
+        } else if (tool === "wind") {
+          patch.weather = "clear";
+        } else if (tool === "seed") {
+          patch.life = clamp(s.life + 0.015);
+        }
+        set(patch);
+      },
+
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
     {
