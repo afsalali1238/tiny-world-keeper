@@ -4,7 +4,7 @@ import { IntroOverlay } from "@/components/ui-overlay/IntroOverlay";
 import { EraRibbon, LivingPulse, MenuCorner } from "@/components/ui-overlay/HUD";
 import { ChoiceCard } from "@/components/ui-overlay/ChoiceCard";
 import { MythFeed } from "@/components/ui-overlay/MythFeed";
-import { GodActions } from "@/components/ui-overlay/GodActions";
+import { ToolDock } from "@/components/ui-overlay/ToolDock";
 import { BackgroundDoodles } from "@/components/ui-overlay/BackgroundDoodles";
 import { useWorld } from "@/game/store";
 
