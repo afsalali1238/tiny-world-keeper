@@ -249,22 +249,37 @@ export function Diorama({ geom }: Props) {
       );
     });
 
-    // rocks
+    // rocks — small surface props, anchored to land like houses & trees.
     rocks.forEach((s, i) => {
       const visible = i < rockCount;
-      const sc = new THREE.Vector3(s.scale * 0.8, s.scale * 0.5, s.scale * 0.8);
+      // Roughly house-sized footprint, low-slung. dodecahedron geom radius is 0.5.
+      const sc = new THREE.Vector3(s.scale * 1.6, s.scale * 1.0, s.scale * 1.6);
       writeAlignedMatrix(
         rockRef.current,
         rockOutlineRef.current,
         i,
         s.sample,
         sc,
-        s.scale * 0.2,
+        s.scale * 0.45,
         s.yaw,
         visible,
-        1.15,
+        1.12,
       );
     });
+    // Zero any unused rock slots (e.g. if rocks.length < ROCK_CAP) so default
+    // identity matrices don't render a unit-size dodecahedron at world origin.
+    for (let i = rocks.length; i < ROCK_CAP; i++) {
+      writeAlignedMatrix(
+        rockRef.current,
+        rockOutlineRef.current,
+        i,
+        { position: new THREE.Vector3(), normal: new THREE.Vector3(0, 1, 0), elevation: 0, latitude: 0, isLand: true },
+        new THREE.Vector3(0, 0, 0),
+        0,
+        0,
+        false,
+      );
+    }
 
     // night lights — one per house, only on night side. Bigger + a halo so they read at distance.
     const lightDir = new THREE.Vector3(2, 1.2, 1.8).normalize();
