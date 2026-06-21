@@ -25,6 +25,7 @@ export function TerrariumApp() {
   const touchLastSeen = useWorld((s) => s.touchLastSeen);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const howto = useHowToPlay();
 
   // Persist "last seen" so we can compute the offline gap on return.
   useEffect(() => {
@@ -54,7 +55,7 @@ export function TerrariumApp() {
         <>
           <EraRibbon />
           <LivingPulse />
-          <MenuCorner />
+          <MenuCorner onHelp={howto.openIt} />
           <SpeedDial />
           <MythFeed />
           <ChoiceCard />
@@ -68,6 +69,7 @@ export function TerrariumApp() {
           <Hints />
           <ComboFlash />
           <GestureSounds />
+          <HowToPlay open={howto.open} onClose={howto.close} />
 
 
         </>
