@@ -101,6 +101,7 @@ export function Narrator() {
   const intro = useWorld((s) => s.intro);
   const audioOn = useWorld((s) => s.audioOn);
   const cue = useWorld((s) => s.currentNarration);
+  const activeChoiceId = useWorld((s) => s.activeChoiceId);
   const clearNarration = useWorld((s) => s.clearNarration);
 
   // Driver: listens to world events and fires narrator lines.
