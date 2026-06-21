@@ -387,12 +387,16 @@ export const useWorld = create<WorldState & Actions>()(
     }),
     {
       name: "terrarium:v1",
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, _version: number) => {
-        // Old saves (v1) didn't have the new fields; merge defaults forward.
         const p = (persisted ?? {}) as Partial<WorldState>;
+        // Old intro values are obsolete in the new assembly flow; if a player
+        // wasn't already in the live world, restart the opening cleanly.
+        const validIntros = new Set(["gift", "name", "spray", "warm", "seed", "pour", "done"]);
+        const introOk = p.intro && validIntros.has(p.intro);
         return {
           ...p,
+          intro: introOk ? p.intro : "gift",
           speed: p.speed ?? 1,
           unlockedCuriosityIds: p.unlockedCuriosityIds ?? [],
           playMs: p.playMs ?? 0,
