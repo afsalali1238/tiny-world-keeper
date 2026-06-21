@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useWorld } from "@/game/store";
-import type { ToolKind } from "@/game/types";
+import type { IntroStep, ToolKind } from "@/game/types";
 
 const TOOLS: { kind: ToolKind; label: string; hint: string; icon: ReactNode }[] = [
   {
@@ -37,30 +37,43 @@ const TOOLS: { kind: ToolKind; label: string; hint: string; icon: ReactNode }[] 
   },
 ];
 
+const INTRO_TOOL: Partial<Record<IntroStep, ToolKind>> = {
+  spray: "rain",
+  warm: "sun",
+  seed: "seed",
+};
+
 export function ToolDock() {
   const intro = useWorld((s) => s.intro);
   const selectedTool = useWorld((s) => s.selectedTool);
   const setTool = useWorld((s) => s.setTool);
-  if (intro !== "done") return null;
 
+  // Hide entirely during the very-first beats and the "pour" climax.
+  if (intro === "gift" || intro === "name" || intro === "pour") return null;
+
+  const lockedTool = INTRO_TOOL[intro] ?? null;
   const active = TOOLS.find((t) => t.kind === selectedTool);
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex flex-col items-center gap-2">
+    <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex flex-col items-center gap-2">
       <p className="font-serif text-xs italic text-foreground/55 min-h-[1em]">
         {active ? active.hint : "pick up a tool, then touch the world"}
       </p>
       <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-card/85 px-2 py-2 backdrop-blur shadow-sm">
         {TOOLS.map((t) => {
           const isOn = selectedTool === t.kind;
+          const disabled = lockedTool !== null && lockedTool !== t.kind;
           return (
             <button
               key={t.kind}
               title={t.label}
+              disabled={disabled}
               onClick={() => setTool(isOn ? null : t.kind)}
               className={
                 "grid h-11 w-11 place-items-center rounded-full transition " +
-                (isOn
+                (disabled
+                  ? "text-foreground/20 cursor-not-allowed"
+                  : isOn
                   ? "bg-accent text-accent-foreground scale-110 shadow"
                   : "text-foreground/70 hover:bg-secondary/70")
               }
