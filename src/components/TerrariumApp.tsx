@@ -13,6 +13,8 @@ import { GlassOverlay } from "@/components/ui-overlay/GlassOverlay";
 import { OfflineCard } from "@/components/ui-overlay/OfflineCard";
 import { AmbientAudio } from "@/components/ui-overlay/AmbientAudio";
 import { Hints } from "@/components/ui-overlay/Hints";
+import { ComboFlash } from "@/components/ui-overlay/ComboFlash";
+
 import { useWorld } from "@/game/store";
 
 export function TerrariumApp() {
