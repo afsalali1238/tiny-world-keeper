@@ -78,6 +78,14 @@ export function Planet({ cold = false }: Props) {
 
   const showAtmo = !cold && intro !== "gift";
 
+  const handlePlanetDown = (e: ThreeEvent<PointerEvent>) => {
+    if (!selectedTool || intro !== "done") return;
+    e.stopPropagation();
+    const local = e.point.clone();
+    if (planetRef.current) planetRef.current.worldToLocal(local);
+    applyToolAt([local.x, local.y, local.z]);
+  };
+
   return (
     <group ref={groupRef}>
       {/* outline (inverted hull) */}
@@ -86,7 +94,13 @@ export function Planet({ cold = false }: Props) {
       </mesh>
 
       {/* planet surface with toon shading */}
-      <mesh ref={planetRef} geometry={geom} castShadow receiveShadow>
+      <mesh
+        ref={planetRef}
+        geometry={geom}
+        castShadow
+        receiveShadow
+        onPointerDown={handlePlanetDown}
+      >
         <meshToonMaterial vertexColors gradientMap={gradient} />
       </mesh>
 
@@ -104,6 +118,7 @@ export function Planet({ cold = false }: Props) {
       )}
 
       {intro === "done" && <Diorama geom={geom} />}
+      {intro === "done" && <TouchEffects />}
     </group>
   );
 }
