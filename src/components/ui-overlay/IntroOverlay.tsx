@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useWorld } from "@/game/store";
 import { NAME_SUGGESTIONS, randomMythicName } from "@/game/names";
+import { loadKeepers } from "@/game/keepers";
+
 
 const GIFT_LINES = [
   "Every Keeper is given one.",
