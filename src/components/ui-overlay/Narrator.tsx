@@ -216,6 +216,8 @@ export function Narrator() {
 
   if (intro !== "done" || !visible) return null;
 
+  const holdMs = readingDuration(visible.text);
+
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-28 z-30 flex justify-center px-6">
       <p
@@ -223,6 +225,7 @@ export function Narrator() {
         className="terrarium-narrate max-w-2xl text-center font-serif text-base italic leading-relaxed text-cream md:text-lg"
         style={{
           textShadow: "0 1px 2px rgba(0,0,0,0.25), 0 0 24px rgba(0,0,0,0.18)",
+          animationDuration: `${holdMs}ms`,
         }}
       >
         {visible.text}
