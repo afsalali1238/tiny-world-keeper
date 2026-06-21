@@ -1,29 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TerrariumApp } from "@/components/TerrariumApp";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Terrarium — a small world to tend" },
+      {
+        name: "description",
+        content:
+          "A cozy tiny-planet god-game. Warm a small world to life, answer its prayers, and watch the myths the people write about you.",
+      },
+      { property: "og:title", content: "Terrarium — a small world to tend" },
+      {
+        property: "og:description",
+        content:
+          "A cozy tiny-planet god-game. Warm a small world, answer its prayers, watch the myths grow.",
+      },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return <TerrariumApp />;
 }
