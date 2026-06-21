@@ -73,7 +73,7 @@ export function Clouds() {
       </instancedMesh>
       <instancedMesh ref={ref} args={[undefined, undefined, COUNT]} frustumCulled={false}>
         <icosahedronGeometry args={[1, 1]} />
-        <meshToonMaterial gradientMap={gradient} color="#fafafa" flatShading />
+        <meshToonMaterial gradientMap={gradient} color="#fafafa" />
       </instancedMesh>
     </group>
   );
