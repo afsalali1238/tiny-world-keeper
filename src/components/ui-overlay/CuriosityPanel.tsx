@@ -78,7 +78,7 @@ export function CuriosityPanel() {
             </div>
 
             <ul className="space-y-2.5">
-              {CURIOSITIES.map((c) => {
+              {tier1.map((c) => {
                 const got = unlockedSet.has(c.id);
                 return (
                   <li
@@ -88,12 +88,7 @@ export function CuriosityPanel() {
                       (got ? "bg-secondary/70" : "bg-secondary/20")
                     }
                   >
-                    <p
-                      className={
-                        "font-serif text-sm " +
-                        (got ? "italic text-foreground/85" : "text-foreground/45")
-                      }
-                    >
+                    <p className={"font-serif text-sm " + (got ? "italic text-foreground/85" : "text-foreground/45")}>
                       {got ? c.label : "—  —  —"}
                     </p>
                     {got && (
@@ -103,6 +98,40 @@ export function CuriosityPanel() {
                 );
               })}
             </ul>
+
+            {tier1Complete && (
+              <>
+                <div className="my-5 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-foreground/15" />
+                  <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/45">
+                    deeper noticings
+                  </span>
+                  <span className="h-px flex-1 bg-foreground/15" />
+                </div>
+                <ul className="space-y-2.5">
+                  {tier2.map((c) => {
+                    const got = unlockedSet.has(c.id);
+                    return (
+                      <li
+                        key={c.id}
+                        className={
+                          "rounded-2xl px-3 py-2 transition " +
+                          (got ? "bg-secondary/70" : "bg-secondary/20")
+                        }
+                      >
+                        <p className={"font-serif text-sm " + (got ? "italic text-foreground/85" : "text-foreground/45")}>
+                          {got ? c.label : "—  —  —"}
+                        </p>
+                        {got && (
+                          <p className="mt-0.5 font-serif text-xs text-foreground/60">{c.hint}</p>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+
 
             <p className="mt-5 text-center font-serif text-[11px] italic text-foreground/45">
               there is no winning. only noticing.
