@@ -33,10 +33,13 @@ export function CuriosityPanel() {
   if (intro !== "done") return null;
 
   const unlockedSet = new Set(unlocked);
+  const tier1 = CURIOSITIES.filter((c) => (c.tier ?? 1) === 1);
+  const tier2 = CURIOSITIES.filter((c) => c.tier === 2);
+  const tier1Complete = tier1.every((c) => unlockedSet.has(c.id));
   const count = unlocked.length;
-  const total = CURIOSITIES.length;
-
+  const total = tier1Complete ? CURIOSITIES.length : tier1.length;
   const hasUnseen = !!useWorld((s) => s.lastUnlockedCuriosity);
+
 
   return (
     <>
