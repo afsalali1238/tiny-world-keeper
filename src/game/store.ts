@@ -50,6 +50,11 @@ const initialWorld: WorldState = {
   firedMythIds: [],
   selectedTool: null,
   effects: [],
+  audioOn: false,
+  currentNarration: null,
+  recentNarrationIds: [],
+  lastToolEvent: null,
+  fifthFired: false,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
