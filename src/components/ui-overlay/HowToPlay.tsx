@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWorld } from "@/game/store";
+import explainerAsset from "@/assets/terrarium-explainer.mp4.asset.json";
 
 const KEY = "terrarium:howto-seen";
 
@@ -32,11 +33,30 @@ export function useHowToPlay() {
 }
 
 export function HowToPlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (open && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [open]);
+
   if (!open) return null;
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 grid place-items-center bg-background/55 px-5 backdrop-blur-md">
-      <div className="terrarium-rise w-[min(560px,94vw)] max-h-[88vh] overflow-y-auto rounded-2xl bg-card/95 p-7 shadow-2xl">
-        <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/45">
+      <div className="terrarium-rise w-[min(620px,94vw)] max-h-[92vh] overflow-y-auto rounded-2xl bg-card/95 p-6 shadow-2xl md:p-7">
+        <div className="overflow-hidden rounded-xl bg-black/40">
+          <video
+            ref={videoRef}
+            src={explainerAsset.url}
+            className="aspect-video w-full"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        </div>
+        <p className="mt-5 font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/45">
           a quiet guide
         </p>
         <h2 className="mt-1 font-serif text-2xl italic text-foreground">
