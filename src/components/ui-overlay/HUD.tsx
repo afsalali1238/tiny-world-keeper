@@ -4,11 +4,15 @@ export function EraRibbon() {
   const ageName = useWorld((s) => s.ageName);
   const planetName = useWorld((s) => s.planetName);
   return (
-    <div className="pointer-events-none absolute left-1/2 top-6 z-20 -translate-x-1/2 text-center">
-      <p className="font-serif text-xs uppercase tracking-[0.3em] text-foreground/50">
-        {planetName}
-      </p>
-      <p className="font-serif text-lg italic text-foreground/85 md:text-xl">{ageName}</p>
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-2">
+      <div className="flex flex-col items-center rounded-full bg-card/75 px-4 py-1.5 text-center shadow-sm backdrop-blur-md">
+        <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/55">
+          {planetName}
+        </p>
+        <p className="font-serif text-base italic leading-tight text-foreground/90 md:text-lg">
+          {ageName}
+        </p>
+      </div>
     </div>
   );
 }
@@ -17,9 +21,9 @@ export function LivingPulse() {
   const life = useWorld((s) => s.life);
   const label = lifeLabel(life);
   return (
-    <div className="pointer-events-none absolute left-6 top-6 z-20 flex items-center gap-2.5">
+    <div className="pointer-events-none absolute left-5 top-16 z-20 flex items-center gap-2.5">
       <span className="terrarium-pulse h-2.5 w-2.5 rounded-full bg-accent" />
-      <span className="font-serif text-sm italic text-foreground/75">{label}</span>
+      <span className="font-serif text-xs italic text-foreground/75">{label}</span>
     </div>
   );
 }

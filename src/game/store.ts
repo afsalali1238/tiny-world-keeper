@@ -20,6 +20,7 @@ interface Actions {
   breatheWarmth: () => void;
   letItRain: () => void;
   plantSpark: () => void;
+  pourPeople: () => void;
   tick: (dt: number) => void;
   surfaceChoiceIfReady: () => void;
   resolveChoice: (option: ChoiceOption) => void;
@@ -126,13 +127,25 @@ export const useWorld = create<WorldState & Actions>()(
       setIntro: (intro) => set({ intro }),
       setPlanetName: (planetName) => {
         rememberKeeper(planetName);
-        set({ planetName, intro: "warm" });
+        set({ planetName, intro: "spray", selectedTool: "rain", warmth: 0, water: 0, life: 0 });
       },
 
-      breatheWarmth: () => set({ warmth: 0.7, intro: "water" }),
-      letItRain: () => set({ water: 0.8, weather: "rain", intro: "life" }),
-      plantSpark: () =>
-        set({ life: 0.12, weather: "clear", intro: "done", ageName: ERAS[0].name }),
+      // Legacy intro actions (kept for backward compat; new flow uses tool taps).
+      breatheWarmth: () => set({ warmth: 0.7 }),
+      letItRain: () => set({ water: 0.8, weather: "rain" }),
+      plantSpark: () => set({ life: 0.12, weather: "clear", ageName: ERAS[0].name }),
+
+      pourPeople: () => {
+        const s = get();
+        // Dramatic jump: scatter people across the world.
+        set({
+          life: Math.max(s.life, 0.45),
+          weather: "aurora",
+          intro: "done",
+          ageName: ERAS[0].name,
+          flags: { ...s.flags, "intro:poured": true },
+        });
+      },
 
       tick: (dt) => {
         const s = get();
@@ -285,19 +298,23 @@ export const useWorld = create<WorldState & Actions>()(
           lastToolEvent: { kind: tool, ts: Date.now() },
           recentCombo,
         };
+
+        // Intro: each correct tap is BIG and advances the next step.
+        const introBoost = s.intro !== "done";
+
         if (tool === "rain") {
-          patch.water = clamp(s.water + 0.06);
+          patch.water = clamp(s.water + (introBoost ? 0.5 : 0.06));
           patch.weather = "rain";
           patch.life = clamp(s.life + 0.004);
         } else if (tool === "sun") {
-          patch.warmth = clamp(s.warmth + 0.06);
+          patch.warmth = clamp(s.warmth + (introBoost ? 0.55 : 0.06));
           patch.weather = "clear";
           patch.life = clamp(s.life + 0.003);
         } else if (tool === "wind") {
           patch.weather = "clear";
           patch.life = clamp(s.life + 0.002);
         } else if (tool === "seed") {
-          patch.life = clamp(s.life + 0.03);
+          patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03));
         }
 
         // Combo aftermath.
@@ -309,6 +326,23 @@ export const useWorld = create<WorldState & Actions>()(
         } else if (hit?.kind === "steam") {
           patch.weather = "aurora";
         }
+
+        // Intro advancement: only when the right tool is used for the step.
+        if (s.intro === "spray" && tool === "rain") {
+          patch.intro = "warm";
+          patch.selectedTool = "sun";
+        } else if (s.intro === "warm" && tool === "sun") {
+          patch.intro = "seed";
+          patch.selectedTool = "seed";
+        } else if (s.intro === "seed" && tool === "seed") {
+          // Let them tap a few times — advance once life has visibly grown.
+          const nextLife = patch.life ?? s.life;
+          if (nextLife >= 0.18) {
+            patch.intro = "pour";
+            patch.selectedTool = null;
+          }
+        }
+
         set(patch);
       },
 
@@ -353,12 +387,16 @@ export const useWorld = create<WorldState & Actions>()(
     }),
     {
       name: "terrarium:v1",
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, _version: number) => {
-        // Old saves (v1) didn't have the new fields; merge defaults forward.
         const p = (persisted ?? {}) as Partial<WorldState>;
+        // Old intro values are obsolete in the new assembly flow; if a player
+        // wasn't already in the live world, restart the opening cleanly.
+        const validIntros = new Set(["gift", "name", "spray", "warm", "seed", "pour", "done"]);
+        const introOk = p.intro && validIntros.has(p.intro);
         return {
           ...p,
+          intro: introOk ? p.intro : "gift",
           speed: p.speed ?? 1,
           unlockedCuriosityIds: p.unlockedCuriosityIds ?? [],
           playMs: p.playMs ?? 0,

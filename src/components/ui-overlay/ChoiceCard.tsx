@@ -10,8 +10,8 @@ export function ChoiceCard() {
   if (!card) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-8 z-20 flex justify-center px-4">
-      <div className="terrarium-rise pointer-events-auto flex w-[min(560px,92vw)] flex-col gap-4 rounded-2xl bg-card/85 p-6 text-center shadow-[0_8px_40px_-12px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+    <div className="pointer-events-none absolute inset-x-0 bottom-44 z-30 flex justify-center px-4">
+      <div className="terrarium-rise pointer-events-auto flex w-[min(560px,92vw)] flex-col gap-4 rounded-2xl bg-card/90 p-5 text-center shadow-[0_8px_40px_-12px_rgba(0,0,0,0.25)] backdrop-blur-xl">
         <div>
           <p className="font-serif text-lg italic text-foreground">{card.prompt}</p>
           {card.sub && (

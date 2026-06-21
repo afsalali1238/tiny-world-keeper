@@ -51,6 +51,9 @@ export function TerrariumApp() {
       )}
 
 
+      {/* ToolDock + IntroOverlay show throughout the assembly opening too */}
+      {intro !== "gift" && intro !== "name" && <ToolDock />}
+
       {intro === "done" && (
         <>
           <EraRibbon />
@@ -59,7 +62,6 @@ export function TerrariumApp() {
           <SpeedDial />
           <MythFeed />
           <ChoiceCard />
-          <ToolDock />
           <CuriosityPanel />
           <CuriosityToast />
           <Narrator />

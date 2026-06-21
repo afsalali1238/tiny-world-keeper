@@ -3,7 +3,6 @@ import { useWorld } from "@/game/store";
 import { NAME_SUGGESTIONS, randomMythicName } from "@/game/names";
 import { loadKeepers } from "@/game/keepers";
 
-
 const GIFT_LINES = [
   "Every Keeper is given one.",
   "A world, small enough to hold. Real enough to matter.",
@@ -11,36 +10,70 @@ const GIFT_LINES = [
   "It's cold. It's waiting.",
 ];
 
+const STEP_PROMPT: Record<"spray" | "warm" | "seed", { title: string; sub: string }> = {
+  spray: {
+    title: "A gift. A small dead rock.",
+    sub: "Spray it. Tap the surface with the rain.",
+  },
+  warm: {
+    title: "Warm it.",
+    sub: "Tap the surface with the sun.",
+  },
+  seed: {
+    title: "Give it life.",
+    sub: "Tap the land with the seed. A few times.",
+  },
+};
+
 export function IntroOverlay() {
   const intro = useWorld((s) => s.intro);
   const setIntro = useWorld((s) => s.setIntro);
   const setPlanetName = useWorld((s) => s.setPlanetName);
-  const breatheWarmth = useWorld((s) => s.breatheWarmth);
-  const letItRain = useWorld((s) => s.letItRain);
-  const plantSpark = useWorld((s) => s.plantSpark);
+  const pourPeople = useWorld((s) => s.pourPeople);
 
   if (intro === "done") return null;
   if (intro === "gift") return <GiftBeat onOpen={() => setIntro("name")} />;
   if (intro === "name") return <NameBeat onName={setPlanetName} />;
 
-  const step =
-    intro === "warm"
-      ? { title: "It's cold.", btn: "Breathe warmth", action: breatheWarmth }
-      : intro === "water"
-        ? { title: "It's dry.", btn: "Let it rain", action: letItRain }
-        : { title: "It's empty.", btn: "Plant the first spark", action: plantSpark };
-
-  return (
-    <div className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center pb-20">
-      <div className="terrarium-rise pointer-events-auto flex flex-col items-center gap-6 rounded-2xl bg-card/80 px-8 py-6 text-center backdrop-blur-xl">
-        <p className="font-serif text-2xl italic text-foreground">{step.title}</p>
+  if (intro === "pour") {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex flex-col items-center gap-2 px-6 text-center">
+        <p className="terrarium-fade font-serif text-xl italic text-foreground md:text-2xl">
+          Now give it someone to live there.
+        </p>
+        <p className="terrarium-fade font-serif text-sm italic text-foreground/65">
+          Tap the jar. Pour them out.
+        </p>
         <button
-          onClick={step.action}
-          className="rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-background transition hover:scale-[1.03]"
+          onClick={pourPeople}
+          className="terrarium-rise pointer-events-auto mt-6 flex flex-col items-center gap-2"
+          aria-label="Pour the first people onto the world"
         >
-          {step.btn}
+          <span className="grid h-20 w-16 place-items-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-foreground/70 bg-card/70 pb-1 backdrop-blur transition hover:scale-[1.04]">
+            <span className="flex gap-0.5">
+              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
+              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
+              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
+            </span>
+          </span>
+          <span className="font-serif text-xs italic text-foreground/60">a jar of people</span>
         </button>
       </div>
+    );
+  }
+
+  // spray | warm | seed
+  const copy = STEP_PROMPT[intro];
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex flex-col items-center gap-1 px-6 text-center">
+      <p
+        key={intro}
+        className="terrarium-fade font-serif text-xl italic text-foreground md:text-2xl"
+      >
+        {copy.title}
+      </p>
+      <p className="terrarium-fade font-serif text-sm italic text-foreground/65">{copy.sub}</p>
     </div>
   );
 }
@@ -89,7 +122,6 @@ function GiftBeat({ onOpen }: { onOpen: () => void }) {
     </div>
   );
 }
-
 
 function NameBeat({ onName }: { onName: (n: string) => void }) {
   const [value, setValue] = useState("");
