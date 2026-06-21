@@ -41,10 +41,11 @@ export function TerrariumApp() {
     <div className="relative h-screen w-screen overflow-hidden">
       <BackgroundDoodles />
       {mounted && (
-        <div className="absolute inset-0 z-10">
+        <div className="terrarium-canvas-filter absolute inset-0 z-10">
           <TerrariumScene />
         </div>
       )}
+
 
       {intro === "done" && (
         <>
