@@ -114,12 +114,15 @@
 
 @keyframes terrarium-narrate-in {
   0%   { opacity: 0; transform: translateY(8px); }
-  20%  { opacity: 1; transform: translateY(0); }
-  85%  { opacity: 1; transform: translateY(0); }
+  18%  { opacity: 1; transform: translateY(0); }
+  88%  { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-4px); }
 }
 .terrarium-narrate {
-  animation: terrarium-narrate-in 6.5s ease-out both;
+  animation-name: terrarium-narrate-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
   color: var(--cream);
 }
+
 
