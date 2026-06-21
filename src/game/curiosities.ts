@@ -157,7 +157,88 @@ export const CURIOSITIES: Curiosity[] = [
     hint: "Time passed while you were gone.",
     check: (s) => s.session >= 2,
   },
+
+  // ----- Curiosities II: only revealed once tier 1 is filled. -----
+  {
+    id: "long-watch",
+    label: "Watch for an hour",
+    hint: "You stayed. They will never know.",
+    tier: 2,
+    check: (s) => s.playMs >= 60 * 60_000,
+  },
+  {
+    id: "third-age",
+    label: "See the third age open",
+    hint: "Time keeps. So do you.",
+    tier: 2,
+    check: (s) => s.era >= 2,
+  },
+  {
+    id: "fourth-age",
+    label: "See the fourth age open",
+    hint: "Their grandparents would not recognise them.",
+    tier: 2,
+    check: (s) => s.era >= 3,
+  },
+  {
+    id: "ten-myths",
+    label: "Collect ten stories",
+    hint: "A small canon, written in firelight.",
+    tier: 2,
+    check: (s) => s.myths.length >= 10,
+  },
+  {
+    id: "every-combo",
+    label: "Learn every combination",
+    hint: "Steam. Bloom. Drought. Exodus. The whole grammar.",
+    tier: 2,
+    check: (s) =>
+      !!s.flags["combo:steam"] &&
+      !!s.flags["combo:bloom"] &&
+      !!s.flags["combo:drought"] &&
+      !!s.flags["combo:exodus"],
+  },
+  {
+    id: "all-traits",
+    label: "See all four shapes of feeling",
+    hint: "Faith, curiosity, fear, harmony. None of them sole.",
+    tier: 2,
+    check: (s) =>
+      s.traits.faith >= 0.3 &&
+      s.traits.curiosity >= 0.3 &&
+      s.traits.fear >= 0.3 &&
+      s.traits.harmony >= 0.3,
+  },
+  {
+    id: "great-flood",
+    label: "Drown a country and let it recover",
+    hint: "The water held. The water left. Something stayed.",
+    tier: 2,
+    check: (s) => s.water >= 0.95,
+  },
+  {
+    id: "great-drought",
+    label: "Push the world to the edge",
+    hint: "Almost nothing green. They remember.",
+    tier: 2,
+    check: (s) => s.life > 0.2 && s.water <= 0.05,
+  },
+  {
+    id: "many-keepers",
+    label: "Become one of many",
+    hint: "Three names, written down. Yours is one of them.",
+    tier: 2,
+    check: (s) => s.session >= 3,
+  },
+  {
+    id: "abandoned",
+    label: "Leave them, then return",
+    hint: "An age passed without you. They wrote a song.",
+    tier: 2,
+    check: (s) => !!s.offlineGapMs && s.offlineGapMs > 10 * 60_000,
+  },
 ];
+
 
 export const CURIOSITY_BY_ID: Record<string, Curiosity> = Object.fromEntries(
   CURIOSITIES.map((c) => [c.id, c]),
