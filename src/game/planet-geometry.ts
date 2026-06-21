@@ -24,20 +24,13 @@ function mulberry32(seed: number) {
 export function buildPlanetGeometry(seed: number, radius = 1) {
   const rng = mulberry32(seed);
   const noise = createNoise3D(rng);
-  const geom = new THREE.IcosahedronGeometry(radius, 12);
+  // detail 6 = chunky low-poly facets, Messenger-style
+  let geom: THREE.BufferGeometry = new THREE.IcosahedronGeometry(radius, 6);
+  // displace vertices with noise (indexed positions, before non-indexing)
   const pos = geom.attributes.position as THREE.BufferAttribute;
-  const colors = new Float32Array(pos.count * 3);
-
-  const seaLevel = 0.02;
   const v = new THREE.Vector3();
-
-  const oceanDeep = new THREE.Color("#2a6e7a");
-  const oceanShallow = new THREE.Color("#4ca6a8");
-  const beach = new THREE.Color("#d9c89a");
-  const land = new THREE.Color("#7fa971");
-  const landDark = new THREE.Color("#4f7a4a");
-  const snow = new THREE.Color("#f3efe6");
-
+  const seaLevel = 0.02;
+  const elevations: number[] = new Array(pos.count);
   for (let i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i).normalize();
     let n = 0;
@@ -49,32 +42,59 @@ export function buildPlanetGeometry(seed: number, radius = 1) {
       freq *= 2.1;
     }
     n *= 0.45;
-
-    const elev = n;
-    const isLand = elev > seaLevel;
-    const surface = v.clone().multiplyScalar(radius * (1 + Math.max(elev, seaLevel) * 0.06));
+    elevations[i] = n;
+    const surface = v.clone().multiplyScalar(radius * (1 + Math.max(n, seaLevel) * 0.06));
     pos.setXYZ(i, surface.x, surface.y, surface.z);
+  }
 
-    const lat = Math.abs(v.y);
-    let c: THREE.Color;
+  // convert to non-indexed so each face has its own verts + normals
+  geom = geom.toNonIndexed();
+  const nPos = geom.attributes.position as THREE.BufferAttribute;
+  const colors = new Float32Array(nPos.count * 3);
+
+  const oceanDeep = new THREE.Color("#2e7d80");
+  const oceanShallow = new THREE.Color("#54b0ad");
+  const beach = new THREE.Color("#e0cf9a");
+  const land = new THREE.Color("#7fbe6a");
+  const landDark = new THREE.Color("#4d8a44");
+  const snow = new THREE.Color("#f3efe6");
+
+  // for each face (3 verts), compute one color from the face centroid and apply to all 3
+  const a = new THREE.Vector3();
+  const b = new THREE.Vector3();
+  const c = new THREE.Vector3();
+  const center = new THREE.Vector3();
+  for (let f = 0; f < nPos.count; f += 3) {
+    a.fromBufferAttribute(nPos, f);
+    b.fromBufferAttribute(nPos, f + 1);
+    c.fromBufferAttribute(nPos, f + 2);
+    center.copy(a).add(b).add(c).multiplyScalar(1 / 3);
+    const dir = center.clone().normalize();
+    const elev = center.length() / radius - 1;
+    const isLand = elev > seaLevel * 0.06 * 0.5;
+    const lat = Math.abs(dir.y);
+    let col: THREE.Color;
     if (!isLand) {
-      const depth = Math.min(1, (seaLevel - elev) * 8);
-      c = oceanShallow.clone().lerp(oceanDeep, depth);
+      const depth = Math.min(1, (seaLevel - elev) * 4);
+      col = oceanShallow.clone().lerp(oceanDeep, depth);
     } else {
-      const h = (elev - seaLevel) / 0.4;
-      if (h < 0.05) c = beach.clone();
-      else c = land.clone().lerp(landDark, Math.min(1, h));
-      if (lat > 0.78) c.lerp(snow, Math.min(1, (lat - 0.78) * 5));
+      const h = Math.min(1, elev * 10);
+      if (h < 0.06) col = beach.clone();
+      else col = land.clone().lerp(landDark, h);
+      if (lat > 0.78) col.lerp(snow, Math.min(1, (lat - 0.78) * 5));
     }
-    colors[i * 3] = c.r;
-    colors[i * 3 + 1] = c.g;
-    colors[i * 3 + 2] = c.b;
+    for (let k = 0; k < 3; k++) {
+      colors[(f + k) * 3] = col.r;
+      colors[(f + k) * 3 + 1] = col.g;
+      colors[(f + k) * 3 + 2] = col.b;
+    }
   }
 
   geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  geom.computeVertexNormals();
+  geom.computeVertexNormals(); // now produces per-face flat normals
   return geom;
 }
+
 
 // sample N points on the planet for placing instances
 export function samplePlanetSurface(
