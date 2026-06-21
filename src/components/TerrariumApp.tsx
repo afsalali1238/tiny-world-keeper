@@ -14,6 +14,8 @@ import { OfflineCard } from "@/components/ui-overlay/OfflineCard";
 import { AmbientAudio } from "@/components/ui-overlay/AmbientAudio";
 import { Hints } from "@/components/ui-overlay/Hints";
 import { ComboFlash } from "@/components/ui-overlay/ComboFlash";
+import { GestureSounds } from "@/components/ui-overlay/GestureSounds";
+
 
 import { useWorld } from "@/game/store";
 
@@ -64,6 +66,8 @@ export function TerrariumApp() {
           <AmbientAudio />
           <Hints />
           <ComboFlash />
+          <GestureSounds />
+
 
         </>
       )}
