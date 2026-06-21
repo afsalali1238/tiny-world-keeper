@@ -127,13 +127,25 @@ export const useWorld = create<WorldState & Actions>()(
       setIntro: (intro) => set({ intro }),
       setPlanetName: (planetName) => {
         rememberKeeper(planetName);
-        set({ planetName, intro: "warm" });
+        set({ planetName, intro: "spray" });
       },
 
-      breatheWarmth: () => set({ warmth: 0.7, intro: "water" }),
-      letItRain: () => set({ water: 0.8, weather: "rain", intro: "life" }),
-      plantSpark: () =>
-        set({ life: 0.12, weather: "clear", intro: "done", ageName: ERAS[0].name }),
+      // Legacy intro actions (kept for backward compat; new flow uses tool taps).
+      breatheWarmth: () => set({ warmth: 0.7 }),
+      letItRain: () => set({ water: 0.8, weather: "rain" }),
+      plantSpark: () => set({ life: 0.12, weather: "clear", ageName: ERAS[0].name }),
+
+      pourPeople: () => {
+        const s = get();
+        // Dramatic jump: scatter people across the world.
+        set({
+          life: Math.max(s.life, 0.45),
+          weather: "aurora",
+          intro: "done",
+          ageName: ERAS[0].name,
+          flags: { ...s.flags, "intro:poured": true },
+        });
+      },
 
       tick: (dt) => {
         const s = get();
