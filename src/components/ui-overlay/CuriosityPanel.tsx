@@ -1,0 +1,108 @@
+import { useEffect, useState } from "react";
+import { useWorld } from "@/game/store";
+import { CURIOSITIES, CURIOSITY_BY_ID } from "@/game/curiosities";
+
+export function CuriosityToast() {
+  const last = useWorld((s) => s.lastUnlockedCuriosity);
+  const ack = useWorld((s) => s.ackCuriosityToast);
+  useEffect(() => {
+    if (!last) return;
+    const t = setTimeout(() => ack(), 4500);
+    return () => clearTimeout(t);
+  }, [last, ack]);
+  if (!last) return null;
+  const c = CURIOSITY_BY_ID[last.id];
+  if (!c) return null;
+  return (
+    <div className="pointer-events-none absolute bottom-28 right-6 z-30 max-w-xs">
+      <div className="terrarium-rise rounded-2xl bg-card/90 px-4 py-3 backdrop-blur shadow-sm">
+        <p className="font-serif text-[10px] uppercase tracking-[0.28em] text-foreground/45">
+          ✦  a curiosity recorded
+        </p>
+        <p className="mt-1 font-serif text-sm italic text-foreground/85">{c.label}</p>
+        <p className="mt-0.5 font-serif text-xs text-foreground/55">{c.hint}</p>
+      </div>
+    </div>
+  );
+}
+
+export function CuriosityPanel() {
+  const intro = useWorld((s) => s.intro);
+  const unlocked = useWorld((s) => s.unlockedCuriosityIds);
+  const [open, setOpen] = useState(false);
+  if (intro !== "done") return null;
+
+  const unlockedSet = new Set(unlocked);
+  const count = unlocked.length;
+  const total = CURIOSITIES.length;
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        title="curiosities"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
+      >
+        ✦ {count} / {total}
+      </button>
+
+      {open && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center bg-ink/30 backdrop-blur-sm p-6"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="terrarium-rise max-h-[80vh] w-full max-w-md overflow-y-auto rounded-3xl bg-card/95 p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-baseline justify-between">
+              <div>
+                <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/45">
+                  the keeper's notebook
+                </p>
+                <p className="font-serif text-xl italic text-foreground/85">curiosities</p>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="font-serif text-xs italic text-foreground/55 hover:text-foreground"
+              >
+                close
+              </button>
+            </div>
+
+            <ul className="space-y-2.5">
+              {CURIOSITIES.map((c) => {
+                const got = unlockedSet.has(c.id);
+                return (
+                  <li
+                    key={c.id}
+                    className={
+                      "rounded-2xl px-3 py-2 transition " +
+                      (got ? "bg-secondary/70" : "bg-secondary/20")
+                    }
+                  >
+                    <p
+                      className={
+                        "font-serif text-sm " +
+                        (got ? "italic text-foreground/85" : "text-foreground/45")
+                      }
+                    >
+                      {got ? c.label : "—  —  —"}
+                    </p>
+                    {got && (
+                      <p className="mt-0.5 font-serif text-xs text-foreground/60">{c.hint}</p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p className="mt-5 text-center font-serif text-[11px] italic text-foreground/45">
+              there is no winning. only noticing.
+            </p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

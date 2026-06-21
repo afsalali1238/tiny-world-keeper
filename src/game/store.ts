@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ChoiceOption, MythEntry, ToolKind, TouchEffect, WorldState } from "./types";
+import type { ChoiceOption, MythEntry, Speed, ToolKind, TouchEffect, WorldState } from "./types";
 import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
+import { CURIOSITIES } from "./curiosities";
 
 export interface NarrationCue {
   id: string;
@@ -27,6 +28,12 @@ interface Actions {
   narrate: (cue: NarrationCue) => void;
   clearNarration: () => void;
   markFifthFired: () => void;
+  setSpeed: (s: Speed) => void;
+  ackCuriosityToast: () => void;
+  markPivotFired: () => void;
+  clearGlassMoment: () => void;
+  clearOfflineGap: () => void;
+  touchLastSeen: () => void;
   reset: () => void;
 }
 
@@ -55,12 +62,20 @@ const initialWorld: WorldState = {
   recentNarrationIds: [],
   lastToolEvent: null,
   fifthFired: false,
+  speed: 1,
+  unlockedCuriosityIds: [],
+  lastUnlockedCuriosity: null,
+  playMs: 0,
+  pivotFired: false,
+  glassMomentAt: null,
+  lastSeenAt: null,
+  offlineGapMs: null,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
 let tickAccumulator = 0;
-let choiceCooldown = 30; // start gently: no choices for the first ~30s
+let choiceCooldown = 30;
 let effectId = 1;
 
 function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
@@ -75,6 +90,24 @@ function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
   return {
     myths: [entry, ...state.myths].slice(0, 30),
     firedMythIds: [...state.firedMythIds, mythId],
+  };
+}
+
+function runCuriosityChecks(state: WorldState): Partial<WorldState> | null {
+  const unlocked = new Set(state.unlockedCuriosityIds);
+  let newly: string | null = null;
+  for (const c of CURIOSITIES) {
+    if (unlocked.has(c.id)) continue;
+    if (c.check(state)) {
+      unlocked.add(c.id);
+      newly = c.id;
+      break; // one per tick keeps toasts from stacking
+    }
+  }
+  if (!newly) return null;
+  return {
+    unlockedCuriosityIds: Array.from(unlocked),
+    lastUnlockedCuriosity: { id: newly, ts: Date.now() },
   };
 }
 
@@ -95,9 +128,17 @@ export const useWorld = create<WorldState & Actions>()(
         const s = get();
         if (s.intro !== "done") return;
 
-        tickAccumulator += dt;
-        choiceCooldown = Math.max(0, choiceCooldown - dt);
-        if (tickAccumulator < 0.25) return;
+        // dt is already scaled by speed in the TickDriver, but we also track
+        // real playtime for the pivot moment.
+        const realDt = dt; // caller scales; pivot uses scaled time too (close enough)
+
+        tickAccumulator += realDt;
+        choiceCooldown = Math.max(0, choiceCooldown - realDt);
+        if (tickAccumulator < 0.25) {
+          // still bump playMs lightly for sub-tick accumulation
+          return;
+        }
+        const accumulated = tickAccumulator;
         tickAccumulator = 0;
 
         const ticks = s.ticks + 1;
@@ -116,23 +157,38 @@ export const useWorld = create<WorldState & Actions>()(
         }
         const ageName = ageNameForEra(era);
 
-        // weather decay
         let weather = s.weather;
         if (weather && weather !== "clear" && Math.random() < 0.01) weather = "clear";
 
-        let patch: Partial<WorldState> = { ticks, life, era, ageName, weather };
+        let patch: Partial<WorldState> = {
+          ticks,
+          life,
+          era,
+          ageName,
+          weather,
+          playMs: s.playMs + accumulated * 1000,
+        };
 
-        // guaranteed creation myth on entering era 3 (index 2)
+        // The Glass: rare camera-pullback on era change.
+        if (era !== s.era && Math.random() < 0.18) {
+          patch.glassMomentAt = Date.now();
+          patch.flags = { ...s.flags, "glass:seen": true };
+        }
+
         if (era >= 2 && !s.firedMythIds.includes("creation")) {
           patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
         }
 
-        // age out touch effects (~2s lifespan)
         const now = Date.now();
         const liveEffects = s.effects.filter((e) => now - e.bornAt < 2000);
         if (liveEffects.length !== s.effects.length) patch.effects = liveEffects;
 
         set(patch);
+
+        // Curiosities check.
+        const curPatch = runCuriosityChecks({ ...get() });
+        if (curPatch) set(curPatch);
+
         get().surfaceChoiceIfReady();
       },
 
@@ -143,7 +199,7 @@ export const useWorld = create<WorldState & Actions>()(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
         if (!eligible.length) return;
-        if (Math.random() > 0.08) return; // rare event, not a steady drumbeat
+        if (Math.random() > 0.08) return;
         const pick = eligible[Math.floor(Math.random() * eligible.length)];
         set({ activeChoiceId: pick.id });
       },
@@ -202,8 +258,16 @@ export const useWorld = create<WorldState & Actions>()(
         if (!tool) return;
         const effect: TouchEffect = { id: effectId++, kind: tool, pos, bornAt: Date.now() };
         const effects = [...s.effects, effect].slice(-12);
+        const flags = { ...s.flags, [`used:${tool}`]: true };
+
+        // Steam combo: rain on a warm/sunlit world.
+        if (tool === "rain" && s.warmth > 0.6) {
+          flags["combo:steam"] = true;
+        }
+
         const patch: Partial<WorldState> = {
           effects,
+          flags,
           lastToolEvent: { kind: tool, ts: Date.now() },
         };
         if (tool === "rain") {
@@ -234,11 +298,26 @@ export const useWorld = create<WorldState & Actions>()(
 
       markFifthFired: () => set({ fifthFired: true }),
 
+      setSpeed: (speed) => set({ speed }),
+
+      ackCuriosityToast: () => set({ lastUnlockedCuriosity: null }),
+
+      markPivotFired: () => {
+        const s = get();
+        set({ pivotFired: true, flags: { ...s.flags, "pivot:fired": true } });
+      },
+
+      clearGlassMoment: () => set({ glassMomentAt: null }),
+
+      clearOfflineGap: () => set({ offlineGapMs: null }),
+
+      touchLastSeen: () => set({ lastSeenAt: Date.now() }),
+
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
     {
       name: "terrarium:v1",
-      version: 1,
+      version: 2,
       partialize: (s) => ({
         planetName: s.planetName,
         seed: s.seed,
@@ -258,12 +337,25 @@ export const useWorld = create<WorldState & Actions>()(
         firedMythIds: s.firedMythIds,
         audioOn: s.audioOn,
         fifthFired: s.fifthFired,
+        speed: s.speed,
+        unlockedCuriosityIds: s.unlockedCuriosityIds,
+        playMs: s.playMs,
+        pivotFired: s.pivotFired,
+        lastSeenAt: s.lastSeenAt,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.session = (state.session ?? 0) + 1;
-          state.activeChoiceId = null;
+        if (!state) return;
+        state.session = (state.session ?? 0) + 1;
+        state.activeChoiceId = null;
+        // Compute offline gap if we have a prior visit and the world is alive.
+        const last = state.lastSeenAt;
+        if (last && state.intro === "done") {
+          const gap = Date.now() - last;
+          if (gap > 5 * 60_000) {
+            state.offlineGapMs = gap;
+          }
         }
+        state.lastSeenAt = Date.now();
       },
     },
   ),
