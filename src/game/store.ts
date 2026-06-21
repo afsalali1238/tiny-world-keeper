@@ -339,6 +339,12 @@ export const useWorld = create<WorldState & Actions>()(
 
       clearRecentCombo: () => set({ recentCombo: null }),
 
+      setComboFirstSeen: () => {
+        const s = get();
+        set({ flags: { ...s.flags, "combo:first-toast-seen": true } });
+      },
+
+
       clearOfflineGap: () => set({ offlineGapMs: null }),
 
       touchLastSeen: () => set({ lastSeenAt: Date.now() }),
