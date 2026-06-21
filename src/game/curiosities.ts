@@ -115,9 +115,27 @@ export const CURIOSITIES: Curiosity[] = [
   },
   {
     id: "rain-on-fire",
-    label: "Notice a contradiction",
-    hint: "Two of your gestures, working against each other.",
+    label: "Make steam",
+    hint: "Two of your gestures, working with each other.",
     check: (s) => !!s.flags["combo:steam"],
+  },
+  {
+    id: "combo-bloom",
+    label: "Coax a bloom",
+    hint: "Water, warmth, a seed. The oldest recipe.",
+    check: (s) => !!s.flags["combo:bloom"],
+  },
+  {
+    id: "combo-drought",
+    label: "Push the world too far",
+    hint: "Three suns. The wells go quiet.",
+    check: (s) => !!s.flags["combo:drought"],
+  },
+  {
+    id: "combo-exodus",
+    label: "Start a migration",
+    hint: "A seed, then a wind to carry it.",
+    check: (s) => !!s.flags["combo:exodus"],
   },
   {
     id: "watcher",
