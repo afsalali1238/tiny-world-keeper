@@ -202,7 +202,10 @@ export const useWorld = create<WorldState & Actions>()(
         if (!tool) return;
         const effect: TouchEffect = { id: effectId++, kind: tool, pos, bornAt: Date.now() };
         const effects = [...s.effects, effect].slice(-12);
-        const patch: Partial<WorldState> = { effects };
+        const patch: Partial<WorldState> = {
+          effects,
+          lastToolEvent: { kind: tool, ts: Date.now() },
+        };
         if (tool === "rain") {
           patch.water = clamp(s.water + 0.04);
           patch.weather = "rain";
@@ -216,6 +219,20 @@ export const useWorld = create<WorldState & Actions>()(
         }
         set(patch);
       },
+
+      setAudio: (audioOn) => set({ audioOn }),
+
+      narrate: (cue) => {
+        const s = get();
+        set({
+          currentNarration: cue,
+          recentNarrationIds: [cue.id, ...s.recentNarrationIds].slice(0, 6),
+        });
+      },
+
+      clearNarration: () => set({ currentNarration: null }),
+
+      markFifthFired: () => set({ fifthFired: true }),
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
