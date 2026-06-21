@@ -207,7 +207,7 @@ export const useWorld = create<WorldState & Actions>()(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
         if (!eligible.length) return;
-        if (Math.random() > 0.08) return;
+        if (Math.random() > 0.16) return;
         const pick = eligible[Math.floor(Math.random() * eligible.length)];
         set({ activeChoiceId: pick.id });
       },
