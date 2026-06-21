@@ -5,6 +5,12 @@ import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
 
+export interface NarrationCue {
+  id: string;
+  text: string;
+  bornAt: number;
+}
+
 interface Actions {
   setIntro: (step: WorldState["intro"]) => void;
   setPlanetName: (name: string) => void;
@@ -17,6 +23,10 @@ interface Actions {
   godAction: (kind: "rain" | "sign" | "withhold") => void;
   setTool: (tool: ToolKind | null) => void;
   applyToolAt: (pos: [number, number, number]) => void;
+  setAudio: (on: boolean) => void;
+  narrate: (cue: NarrationCue) => void;
+  clearNarration: () => void;
+  markFifthFired: () => void;
   reset: () => void;
 }
 
