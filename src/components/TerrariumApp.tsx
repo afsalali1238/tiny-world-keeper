@@ -15,6 +15,7 @@ import { AmbientAudio } from "@/components/ui-overlay/AmbientAudio";
 import { Hints } from "@/components/ui-overlay/Hints";
 import { ComboFlash } from "@/components/ui-overlay/ComboFlash";
 import { GestureSounds } from "@/components/ui-overlay/GestureSounds";
+import { HowToPlay, useHowToPlay } from "@/components/ui-overlay/HowToPlay";
 
 
 import { useWorld } from "@/game/store";
@@ -24,6 +25,7 @@ export function TerrariumApp() {
   const touchLastSeen = useWorld((s) => s.touchLastSeen);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const howto = useHowToPlay();
 
   // Persist "last seen" so we can compute the offline gap on return.
   useEffect(() => {
@@ -53,7 +55,7 @@ export function TerrariumApp() {
         <>
           <EraRibbon />
           <LivingPulse />
-          <MenuCorner />
+          <MenuCorner onHelp={howto.openIt} />
           <SpeedDial />
           <MythFeed />
           <ChoiceCard />
@@ -67,6 +69,7 @@ export function TerrariumApp() {
           <Hints />
           <ComboFlash />
           <GestureSounds />
+          <HowToPlay open={howto.open} onClose={howto.close} />
 
 
         </>

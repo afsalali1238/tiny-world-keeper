@@ -24,11 +24,20 @@ export function LivingPulse() {
   );
 }
 
-export function MenuCorner() {
+export function MenuCorner({ onHelp }: { onHelp?: () => void } = {}) {
   const audioOn = useWorld((s) => s.audioOn);
   const setAudio = useWorld((s) => s.setAudio);
   return (
     <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
+      {onHelp && (
+        <button
+          title="How to play"
+          onClick={onHelp}
+          className="grid h-9 w-9 place-items-center rounded-full bg-card/60 font-serif text-sm italic text-foreground/70 backdrop-blur transition hover:bg-card/90"
+        >
+          ?
+        </button>
+      )}
       <button
         title={audioOn ? "Narrator voice on" : "Narrator voice off"}
         onClick={() => setAudio(!audioOn)}
