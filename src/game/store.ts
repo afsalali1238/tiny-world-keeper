@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ChoiceOption, MythEntry, WorldState } from "./types";
+import type { ChoiceOption, MythEntry, ToolKind, TouchEffect, WorldState } from "./types";
 import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
@@ -15,6 +15,8 @@ interface Actions {
   surfaceChoiceIfReady: () => void;
   resolveChoice: (option: ChoiceOption) => void;
   godAction: (kind: "rain" | "sign" | "withhold") => void;
+  setTool: (tool: ToolKind | null) => void;
+  applyToolAt: (pos: [number, number, number]) => void;
   reset: () => void;
 }
 
