@@ -3,6 +3,8 @@ import { OrbitControls, ContactShadows } from "@react-three/drei";
 import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Planet } from "./Planet";
+import { TouchEffects } from "./TouchEffects";
+
 import { Clouds } from "./Clouds";
 import { Aurora } from "./Aurora";
 import { SunLight } from "./SunLight";
@@ -60,6 +62,8 @@ export function TerrariumScene() {
         <Planet cold={intro === "gift"} />
         {intro !== "gift" && <Clouds />}
         {intro === "done" && <Aurora />}
+        {intro === "done" && <TouchEffects />}
+
         <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
         <OrbitControls
           enablePan={false}

@@ -207,7 +207,7 @@ export const useWorld = create<WorldState & Actions>()(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
         if (!eligible.length) return;
-        if (Math.random() > 0.08) return;
+        if (Math.random() > 0.16) return;
         const pick = eligible[Math.floor(Math.random() * eligible.length)];
         set({ activeChoiceId: pick.id });
       },
@@ -284,16 +284,20 @@ export const useWorld = create<WorldState & Actions>()(
           recentCombo,
         };
         if (tool === "rain") {
-          patch.water = clamp(s.water + 0.04);
+          patch.water = clamp(s.water + 0.06);
           patch.weather = "rain";
+          patch.life = clamp(s.life + 0.004);
         } else if (tool === "sun") {
-          patch.warmth = clamp(s.warmth + 0.04);
+          patch.warmth = clamp(s.warmth + 0.06);
           patch.weather = "clear";
+          patch.life = clamp(s.life + 0.003);
         } else if (tool === "wind") {
           patch.weather = "clear";
+          patch.life = clamp(s.life + 0.002);
         } else if (tool === "seed") {
-          patch.life = clamp(s.life + 0.015);
+          patch.life = clamp(s.life + 0.03);
         }
+
         // Combo aftermath.
         if (hit?.kind === "bloom") {
           patch.life = clamp((patch.life ?? s.life) + 0.04);

@@ -8,7 +8,7 @@ import {
 } from "@/game/narrator-lines";
 import { priorKeeper } from "@/game/keepers";
 
-const MIN_GAP_MS = 26_000; // calm pacing between lines
+const MIN_GAP_MS = 18_000; // calm pacing between lines
 
 function readingDuration(text: string) {
   // Rough: ~14 chars per second + 1.2s lead + 1.2s tail. Clamped.
@@ -213,7 +213,7 @@ export function Narrator() {
       }
     }, 6000);
 
-    const introTimer = setTimeout(() => fire("idle", { allowUncannyDraft: false, allowEchoDraft: false }), 4000);
+    const introTimer = setTimeout(() => fire("idle", { allowUncannyDraft: false, allowEchoDraft: false, minGapOverride: 0 }), 900);
 
     return () => {
       unsub();
