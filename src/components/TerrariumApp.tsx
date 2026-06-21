@@ -29,7 +29,7 @@ export function TerrariumApp() {
           <MenuCorner />
           <MythFeed />
           <ChoiceCard />
-          <GodActions />
+          <ToolDock />
         </>
       )}
 
