@@ -36,15 +36,19 @@ export function CuriosityPanel() {
   const count = unlocked.length;
   const total = CURIOSITIES.length;
 
+  const hasUnseen = !!useWorld((s) => s.lastUnlockedCuriosity);
+
   return (
     <>
       <button
         onClick={() => setOpen(true)}
         title="curiosities"
-        className="pointer-events-auto absolute left-5 bottom-5 z-20 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
       >
-        ✦ {count} / {total}
+        <span>✦ {count} / {total}</span>
+        {hasUnseen && <span className="terrarium-pulse h-1.5 w-1.5 rounded-full bg-accent" />}
       </button>
+
 
       {open && (
         <div
