@@ -38,6 +38,8 @@ const initialWorld: WorldState = {
   activeChoiceId: null,
   resolvedChoiceIds: [],
   firedMythIds: [],
+  selectedTool: null,
+  effects: [],
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
