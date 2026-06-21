@@ -31,6 +31,7 @@ export function TerrariumApp() {
           <MythFeed />
           <ChoiceCard />
           <ToolDock />
+          <Narrator />
         </>
       )}
 
