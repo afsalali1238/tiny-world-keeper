@@ -91,6 +91,8 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
   { id: "uncanny-2", trigger: "uncanny", text: "Notice the shape of the small fires in the north. Read from above, they almost spell a question." },
   { id: "uncanny-3", trigger: "uncanny", text: "And in some quiet room of their making, a child has begun to build a tiny world of their own. They are not sure why." },
   { id: "uncanny-4", trigger: "uncanny", text: "Their best mathematicians, in late evenings, in quiet rooms, are beginning to suspect that the numbers prefer round figures." },
+  { id: "uncanny-5", trigger: "uncanny", text: "A scholar, in a country we have not yet noticed, has written a thin book asking whether the sky is being watched from the other side." },
+  { id: "uncanny-6", trigger: "uncanny", text: "There is a word, in three of their languages now, for the feeling of being observed without menace. It is a new word." },
 
   // Pivot.
   { id: "pivot-1", trigger: "pivot", text: "The keeper has not moved in some time. The people have started to wonder if the keeper is also being watched." },
