@@ -47,6 +47,7 @@ export function IntroOverlay() {
 
 function GiftBeat({ onOpen }: { onOpen: () => void }) {
   const [shown, setShown] = useState(0);
+  const keepers = loadKeepers();
   useEffect(() => {
     if (shown >= GIFT_LINES.length) return;
     const t = setTimeout(() => setShown((s) => s + 1), 1800);
@@ -66,16 +67,29 @@ function GiftBeat({ onOpen }: { onOpen: () => void }) {
         ))}
       </div>
       {shown >= GIFT_LINES.length && (
-        <button
-          onClick={onOpen}
-          className="terrarium-rise pointer-events-auto mt-10 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition hover:scale-[1.03]"
-        >
-          Open the terrarium
-        </button>
+        <>
+          {keepers.length > 0 && (
+            <div className="terrarium-fade mt-8 max-w-md px-6 text-center">
+              <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/40">
+                former keepers
+              </p>
+              <p className="mt-2 font-serif text-sm italic text-foreground/55">
+                {keepers.slice(0, 6).join("  ·  ")}
+              </p>
+            </div>
+          )}
+          <button
+            onClick={onOpen}
+            className="terrarium-rise pointer-events-auto mt-8 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition hover:scale-[1.03]"
+          >
+            Open the terrarium
+          </button>
+        </>
       )}
     </div>
   );
 }
+
 
 function NameBeat({ onName }: { onName: (n: string) => void }) {
   const [value, setValue] = useState("");
