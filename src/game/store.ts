@@ -20,6 +20,7 @@ interface Actions {
   breatheWarmth: () => void;
   letItRain: () => void;
   plantSpark: () => void;
+  pourPeople: () => void;
   tick: (dt: number) => void;
   surfaceChoiceIfReady: () => void;
   resolveChoice: (option: ChoiceOption) => void;
