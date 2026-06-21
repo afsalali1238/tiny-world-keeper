@@ -261,22 +261,24 @@ export function Diorama({ geom }: Props) {
       );
     });
 
-    // night lights — one per house, only on night side
+    // night lights — one per house, only on night side. Bigger + a halo so they read at distance.
     const lightDir = new THREE.Vector3(2, 1.2, 1.8).normalize();
     const parentRot = (lightsRef.current?.parent?.parent?.rotation as THREE.Euler) ?? new THREE.Euler();
     houses.forEach((s, i) => {
       if (i >= LIGHT_CAP) return;
       const worldPos = s.sample.position.clone().applyEuler(parentRot);
       const facing = worldPos.normalize().dot(lightDir);
-      const isNight = facing < -0.05 && i < houseCount;
-      const sc = isNight ? new THREE.Vector3(s.scale * 0.5, s.scale * 0.5, s.scale * 0.5) : new THREE.Vector3(0, 0, 0);
+      const isNight = facing < 0.05 && i < houseCount;
+      const sc = isNight
+        ? new THREE.Vector3(s.scale * 1.1, s.scale * 1.1, s.scale * 1.1)
+        : new THREE.Vector3(0, 0, 0);
       writeAlignedMatrix(
         lightsRef.current,
         null,
         i,
         s.sample,
         sc,
-        s.scale * 0.7,
+        s.scale * 0.85,
         s.yaw,
         isNight,
       );
@@ -350,10 +352,17 @@ export function Diorama({ geom }: Props) {
         <meshToonMaterial {...toonProps} color="#8d8e8a" />
       </instancedMesh>
 
-      {/* NIGHT LIGHTS */}
+      {/* NIGHT LIGHTS — additive emissive blobs that glow on the dark side */}
       <instancedMesh ref={lightsRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false}>
-        <sphereGeometry args={[0.4, 6, 6]} />
-        <meshBasicMaterial color="#ffd084" />
+        <sphereGeometry args={[0.5, 8, 8]} />
+        <meshBasicMaterial
+          color="#ffd084"
+          transparent
+          opacity={0.95}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
       </instancedMesh>
     </group>
   );
