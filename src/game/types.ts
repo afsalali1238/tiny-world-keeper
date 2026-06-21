@@ -28,6 +28,8 @@ export interface WorldState {
   activeChoiceId: string | null;
   resolvedChoiceIds: string[];
   firedMythIds: string[];
+  selectedTool: ToolKind | null;
+  effects: TouchEffect[];
 }
 
 export interface MythEntry {
