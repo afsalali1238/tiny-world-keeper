@@ -30,6 +30,11 @@ export interface WorldState {
   firedMythIds: string[];
   selectedTool: ToolKind | null;
   effects: TouchEffect[];
+  audioOn: boolean;
+  currentNarration: { id: string; text: string; bornAt: number } | null;
+  recentNarrationIds: string[];
+  lastToolEvent: { kind: ToolKind; ts: number } | null;
+  fifthFired: boolean;
 }
 
 export interface MythEntry {
