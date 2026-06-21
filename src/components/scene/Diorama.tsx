@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { samplePlanetSurface, type PlanetSample } from "@/game/planet-geometry";
@@ -41,9 +41,13 @@ export function Diorama({ geom }: Props) {
   const lifeRef = useRef(useWorld.getState().life);
 
   // subscribe to life without re-rendering every tick
-  useWorld.subscribe((s) => {
-    lifeRef.current = s.life;
-  });
+  useEffect(() => {
+    lifeRef.current = useWorld.getState().life;
+    return useWorld.subscribe((s) => {
+      lifeRef.current = s.life;
+    });
+  }, []);
+
 
   const slots = useMemo<Slot[]>(() => {
     const samples = samplePlanetSurface(geom, seed, TOTAL);
