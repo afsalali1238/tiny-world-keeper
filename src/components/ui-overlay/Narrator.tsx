@@ -8,7 +8,7 @@ import {
 } from "@/game/narrator-lines";
 import { priorKeeper } from "@/game/keepers";
 
-const MIN_GAP_MS = 26_000; // calm pacing between lines
+const MIN_GAP_MS = 18_000; // calm pacing between lines
 
 function readingDuration(text: string) {
   // Rough: ~14 chars per second + 1.2s lead + 1.2s tail. Clamped.
