@@ -84,7 +84,7 @@ export function Planet({ cold = false }: Props) {
 
       {/* planet surface with toon shading */}
       <mesh ref={planetRef} geometry={geom} castShadow receiveShadow>
-        <meshToonMaterial vertexColors gradientMap={gradient} />
+        <meshToonMaterial vertexColors gradientMap={gradient} flatShading />
       </mesh>
 
       {showAtmo && (

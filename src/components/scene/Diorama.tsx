@@ -292,7 +292,8 @@ export function Diorama({ geom }: Props) {
     });
   });
 
-  const toonProps = { gradientMap: gradient };
+  const toonProps = { gradientMap: gradient, flatShading: true };
+
 
   return (
     <group>
