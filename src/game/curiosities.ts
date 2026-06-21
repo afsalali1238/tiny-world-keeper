@@ -8,8 +8,10 @@ export interface Curiosity {
   id: string;
   label: string;
   hint: string; // revealed after unlock
+  tier?: 1 | 2;
   check: (s: WorldState) => boolean;
 }
+
 
 export const CURIOSITIES: Curiosity[] = [
   {
