@@ -298,19 +298,23 @@ export const useWorld = create<WorldState & Actions>()(
           lastToolEvent: { kind: tool, ts: Date.now() },
           recentCombo,
         };
+
+        // Intro: each correct tap is BIG and advances the next step.
+        const introBoost = s.intro !== "done";
+
         if (tool === "rain") {
-          patch.water = clamp(s.water + 0.06);
+          patch.water = clamp(s.water + (introBoost ? 0.5 : 0.06));
           patch.weather = "rain";
           patch.life = clamp(s.life + 0.004);
         } else if (tool === "sun") {
-          patch.warmth = clamp(s.warmth + 0.06);
+          patch.warmth = clamp(s.warmth + (introBoost ? 0.55 : 0.06));
           patch.weather = "clear";
           patch.life = clamp(s.life + 0.003);
         } else if (tool === "wind") {
           patch.weather = "clear";
           patch.life = clamp(s.life + 0.002);
         } else if (tool === "seed") {
-          patch.life = clamp(s.life + 0.03);
+          patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03));
         }
 
         // Combo aftermath.
@@ -322,6 +326,23 @@ export const useWorld = create<WorldState & Actions>()(
         } else if (hit?.kind === "steam") {
           patch.weather = "aurora";
         }
+
+        // Intro advancement: only when the right tool is used for the step.
+        if (s.intro === "spray" && tool === "rain") {
+          patch.intro = "warm";
+          patch.selectedTool = "sun";
+        } else if (s.intro === "warm" && tool === "sun") {
+          patch.intro = "seed";
+          patch.selectedTool = "seed";
+        } else if (s.intro === "seed" && tool === "seed") {
+          // Let them tap a few times — advance once life has visibly grown.
+          const nextLife = patch.life ?? s.life;
+          if (nextLife >= 0.18) {
+            patch.intro = "pour";
+            patch.selectedTool = null;
+          }
+        }
+
         set(patch);
       },
 
