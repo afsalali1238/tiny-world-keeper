@@ -49,11 +49,12 @@ function SceneBackground() {
 
 export function TerrariumScene() {
   const intro = useWorld((s) => s.intro);
+  const showSurface = intro !== "gift" && intro !== "name";
   return (
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.4, 4.6], fov: 30 }}
+      camera={{ position: [0, 0.25, 2.55], fov: 36 }}
       gl={{ antialias: true }}
     >
       <SceneBackground />
@@ -62,7 +63,7 @@ export function TerrariumScene() {
         <Planet cold={intro === "gift"} />
         {intro !== "gift" && <Clouds />}
         {intro === "done" && <Aurora />}
-        {intro === "done" && <TouchEffects />}
+        {showSurface && <TouchEffects />}
 
         <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
         <OrbitControls
