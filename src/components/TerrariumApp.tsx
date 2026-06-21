@@ -63,6 +63,8 @@ export function TerrariumApp() {
           <OfflineCard />
           <AmbientAudio />
           <Hints />
+          <ComboFlash />
+
         </>
       )}
 
