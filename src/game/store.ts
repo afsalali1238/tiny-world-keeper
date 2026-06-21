@@ -5,6 +5,8 @@ import { ageNameForEra, ERAS } from "./eras";
 import { CHOICE_CARDS } from "./choices";
 import { MYTH_LIBRARY } from "./myths";
 import { CURIOSITIES } from "./curiosities";
+import { detectCombo } from "./combos";
+import { rememberKeeper } from "./keepers";
 
 export interface NarrationCue {
   id: string;
@@ -70,6 +72,7 @@ const initialWorld: WorldState = {
   glassMomentAt: null,
   lastSeenAt: null,
   offlineGapMs: null,
+  recentCombo: null,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -77,6 +80,7 @@ const clamp = (n: number) => Math.max(0, Math.min(1, n));
 let tickAccumulator = 0;
 let choiceCooldown = 30;
 let effectId = 1;
+let comboMemory = { lastTool: null as ToolKind | null, lastToolTs: 0, sunStreak: { count: 0, lastTs: 0 } };
 
 function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
   if (state.firedMythIds.includes(mythId)) return {};
