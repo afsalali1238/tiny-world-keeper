@@ -23,6 +23,11 @@ export function Planet({ cold = false }: Props) {
   const groupRef = useRef<THREE.Group>(null);
   const planetRef = useRef<THREE.Mesh>(null);
   const gradient = useMemo(() => getToonGradient(), []);
+  const glitchRef = useRef<{ next: number; until: number; axis: number }>({
+    next: 0,
+    until: 0,
+    axis: 0,
+  });
 
   const baseColors = useMemo(() => {
     const c = geom.attributes.color as THREE.BufferAttribute;
@@ -34,7 +39,24 @@ export function Planet({ cold = false }: Props) {
     if (groupRef.current) {
       groupRef.current.rotation.y += dt * 0.04;
       const breathe = 1 + Math.sin(t * 0.7) * 0.006;
+      // Render glitch: ~once every 3-6 minutes, scale.x desyncs by 0.04 for 180ms.
+      // The world is rendered, and the rendering is fallible.
+      const g = glitchRef.current;
+      const nowMs = performance.now();
+      if (g.next === 0) g.next = nowMs + 180_000 + Math.random() * 180_000;
+      if (nowMs > g.next && intro === "done") {
+        g.until = nowMs + 180;
+        g.axis = Math.floor(Math.random() * 3);
+        g.next = nowMs + 180_000 + Math.random() * 180_000;
+      }
+      const glitching = nowMs < g.until;
       groupRef.current.scale.setScalar(breathe);
+      if (glitching) {
+        const pop = 1 + 0.045;
+        if (g.axis === 0) groupRef.current.scale.x = breathe * pop;
+        else if (g.axis === 1) groupRef.current.scale.y = breathe * pop;
+        else groupRef.current.scale.z = breathe * pop;
+      }
     }
 
     if (planetRef.current) {

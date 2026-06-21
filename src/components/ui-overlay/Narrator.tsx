@@ -175,6 +175,22 @@ export function Narrator() {
       clearInterval(pivotTimer);
     }, 8000);
 
+    // The Anthropic Whisper. Once unlocked (~12 min in), rare break-frame line every ~30 min.
+    const whisperTimer = setInterval(() => {
+      const s = useWorld.getState();
+      if (s.activeChoiceId || s.currentNarration) return;
+      if (s.playMs < 12 * 60_000) return;
+      const lastWhisperAt = (s.flags["whisper:lastAt"] as unknown as number) ?? 0;
+      const since = Date.now() - lastWhisperAt;
+      if (lastWhisperAt && since < 30 * 60_000) return;
+      if (Math.random() > 0.06) return; // ~each 8s check, low prob → roughly once per few minutes after unlock
+      const line = pickLine("whisper", s.recentNarrationIds);
+      if (!line) return;
+      lastNarratedAt = Date.now();
+      useWorld.getState().narrate({ id: line.id, text: line.text, bornAt: Date.now() });
+      useWorld.setState({ flags: { ...s.flags, "whisper:lastAt": Date.now() as unknown as boolean } });
+    }, 8000);
+
     const unsub = useWorld.subscribe((s) => {
       // combo wins over tool line (it's the more interesting beat).
       const cTs = s.recentCombo?.ts ?? 0;
@@ -221,6 +237,7 @@ export function Narrator() {
       clearTimeout(fifthTimer);
       clearTimeout(introTimer);
       clearInterval(pivotTimer);
+      clearInterval(whisperTimer);
     };
   }, [intro]);
 

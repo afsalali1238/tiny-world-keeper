@@ -14,10 +14,12 @@ export function SunLight() {
     ref.current.position.set(Math.cos(t * speed) * 5, 1.6, Math.sin(t * speed) * 5);
   });
 
-  const intensity = intro === "gift" ? 0.5 : 1.4;
+  const intensity = intro === "gift" ? 0.5 : 1.7;
+  // Low ambient creates a real terminator line so the night side reads as night.
+  const ambient = intro === "gift" ? 0.35 : 0.16;
   return (
     <>
-      <ambientLight intensity={0.45} color="#dff0ec" />
+      <ambientLight intensity={ambient} color="#9fb8c8" />
       <directionalLight ref={ref} position={[3, 2, 3]} intensity={intensity} color="#fff4d8" />
     </>
   );

@@ -14,6 +14,7 @@ export type NarratorTrigger =
   | "fifthVisit"
   | "uncanny"
   | "pivot"
+  | "whisper"
   | "combo:steam"
   | "combo:bloom"
   | "combo:drought"
@@ -96,6 +97,12 @@ export const NARRATOR_LIBRARY: NarratorLine[] = [
 
   // Pivot.
   { id: "pivot-1", trigger: "pivot", text: "The keeper has not moved in some time. The people have started to wonder if the keeper is also being watched." },
+
+  // The Anthropic Whisper. Rare. The narrator briefly breaks frame.
+  { id: "whisper-1", trigger: "whisper", text: "There is someone watching this world. You know them." },
+  { id: "whisper-2", trigger: "whisper", text: "You are not the first one above this glass. You will not be the last." },
+  { id: "whisper-3", trigger: "whisper", text: "The room around you. The light on the back of your hand. Notice it. We do." },
+  { id: "whisper-4", trigger: "whisper", text: "Somewhere, a keeper is keeping a keeper. The chain does not feel as long as it is." },
 
   // Combos.
   { id: "combo-steam-1", trigger: "combo:steam", text: "Rain on warm ground. A pale mist climbs. The priests of one village will, in time, declare it the breath of the world." },
