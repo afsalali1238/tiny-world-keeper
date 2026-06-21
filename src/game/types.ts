@@ -1,6 +1,13 @@
 export type Trait = "faith" | "curiosity" | "fear" | "harmony";
 export type Weather = "clear" | "rain" | "storm" | "aurora" | null;
-export type IntroStep = "gift" | "name" | "warm" | "water" | "life" | "done";
+export type IntroStep =
+  | "gift"
+  | "name"
+  | "spray" // tap rain on the planet to wake it
+  | "warm" // tap sun to brighten it
+  | "seed" // tap seed to plant the first life
+  | "pour" // tap the container to dump the first people
+  | "done";
 export type ToolKind = "rain" | "sun" | "wind" | "seed";
 export type Speed = 0.5 | 1 | 4;
 
