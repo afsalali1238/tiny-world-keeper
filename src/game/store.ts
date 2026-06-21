@@ -35,6 +35,8 @@ interface Actions {
   markPivotFired: () => void;
   clearGlassMoment: () => void;
   clearRecentCombo: () => void;
+  setComboFirstSeen: () => void;
+
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
   reset: () => void;
