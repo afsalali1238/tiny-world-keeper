@@ -1,152 +1,80 @@
-# Terrarium — MVP Plan (Phase 1)
+# Visual overhaul — Messenger diorama look
 
-A cozy, low-poly 3D god-game in the browser. You hold a tiny planet, warm it to life, then tend it through small soft choices that the people turn into myths. This plan covers MVP only; Asha, audio, the 5th-session meta beat, and final polish are Phase 2.
+Goal: shift Terrarium from "soft pastel low-poly" to the chunky, graphic, cel-shaded **Messenger** look — flat saturated background, dense diorama of stylized props on the planet, toon outlines, floating doodle decorations.
 
-## Locked decisions
+No new gameplay. Same loop, same store. Pure visual + scene-density pass.
 
-- **Scope:** MVP only — living planet, Genesis intro, choice/myth loop, save.
-- **Persistence:** `localStorage` (Zustand `persist` middleware). No backend.
-- **Planet names:** mythic suggestions (Vael, Mireth, Oru, Aethel, Sirin, Thal) + "surprise me" generator.
-- **Followed person:** name randomized per save (Phase 2 — but reserved in the data model now).
-- **Art:** primitives only (icosphere planet, instanced boxes/cones/capsules for houses/trees/people). No GLBs.
+## What changes
 
-## What we're building
+### 1. Background — flat saturated color
+- Remove the lavender→peach radial gradients from `body`.
+- Replace with a single solid **terrarium teal** (`#5fb8b8`-ish in oklch), matching Messenger's signature backdrop.
+- The R3F canvas gets a matching `scene.background` color so there's no seam.
+- Body-level `body` styles trimmed to just the solid color; the gradient classes stay available as utilities but aren't used.
+
+### 2. Toon shading + outlines on the planet and props
+- Swap `meshStandardMaterial` → `MeshToonMaterial` with a 3-step gradient map for crisp cel-shading.
+- Add an **inverted-hull outline** to the planet, houses, and trees (a slightly-scaled back-faced mesh in dark ink color). This is cheap, works without postprocessing, and gives the Messenger silhouette.
+- Reduce light count to one strong key + low ambient so the toon banding reads cleanly.
+
+### 3. Chunky illustrated props (the big visual delta)
+Replace today's boxes-and-cones with multi-shape "kits" so each prop reads as a tiny building / tree:
+- **House kit**: a colored box body + a darker pitched-roof prism + a tiny chimney. Random palette per instance from a warm Messenger set (terracotta, mustard, cream, dusty blue, brick).
+- **Tree kit**: stacked spheres or a low-poly blob on a thin trunk; two species (round broadleaf in deep green, conical pine in forest green).
+- **Rock kit**: small grey low-poly chunks scattered as filler.
+- Density goes way up: cap ~180 trees, ~100 houses, ~40 rocks. As `life` grows, slots fill from 0 → cap (same mechanic, just chunkier and more numerous).
+- Each prop builds as a small `<group>` exported once; we batch into instanced meshes per sub-shape (house body / roof / tree foliage / tree trunk) so we keep the perf budget.
+
+### 4. Planet surface
+- Keep the noise-displaced icosphere, but bump base saturation: oceans toward Messenger's bright teal (`#6cc1bd`), land toward vivid grass green (`#7fbe6a`), beaches toward warm sand.
+- Slightly larger planet on screen (camera pulled in from z=3.4 → z=3.0) so it fills more frame like Messenger.
+- Atmosphere rim dialed back (the flat-bg look reads cleaner without a haze).
+
+### 5. Floating doodle decorations
+- Add 12–18 hand-drawn-feeling SVG doodles (squiggles, tiny clouds, asterisks, little birds) randomly placed in the **DOM overlay layer** behind the HUD, very low opacity, slow drift via CSS transform animations.
+- Pure CSS/SVG, no 3D cost. They live in a new `BackgroundDoodles` component.
+
+### 6. HUD palette retune
+- Cards: keep the soft glassy card style but warm the surface slightly to read against the teal.
+- Era ribbon + living pulse: text color shifts to a deep teal/ink for contrast on the flat background.
+- Choice card buttons: cream/ink pairing rather than dark slate.
+
+### 7. Day/night, weather, clouds
+- Day/night still rolls; on night side the toon shading darkens (gradient map handles it automatically), warm window-lights pop more.
+- Clouds become small chunky white blobs (same instancing, smaller scale, fewer = ~25) with the toon outline treatment.
+
+## Files touched
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│  era ribbon (italic serif, name only)               │
-│  ◐ "a thriving world"                  🔊  ☰        │
-│                                                     │
-│                    ╱──────╲                         │
-│                   │ PLANET │   ← orbit/drag,        │
-│                    ╲──────╱      idle auto-rotate   │
-│                                                     │
-│                                          ┌────────┐ │
-│                                          │ myths  │ │
-│                                          │  feed  │ │
-│                                          └────────┘ │
-│         ┌─────── choice card ───────┐               │
-│         │  prompt + 2-3 options     │   [☀][☔][☄] │
-│         └───────────────────────────┘               │
-└─────────────────────────────────────────────────────┘
+src/styles.css                              — flat teal bg, palette retune
+src/components/scene/Planet.tsx             — toon material + outline, denser sampling
+src/components/scene/Clouds.tsx             — chunky toon-outlined puffs
+src/components/scene/SunLight.tsx           — single key light, lower ambient
+src/components/scene/TerrariumScene.tsx     — scene.background = teal, camera 3.0
+src/components/scene/props/House.tsx        — NEW: instanced body+roof+chimney kit
+src/components/scene/props/Tree.tsx         — NEW: instanced foliage+trunk kit (2 species)
+src/components/scene/props/Rocks.tsx        — NEW: instanced rock chunks
+src/components/scene/Outline.tsx            — NEW: helper for inverted-hull outline meshes
+src/components/ui-overlay/BackgroundDoodles.tsx  — NEW: SVG doodles overlay
+src/components/ui-overlay/HUD.tsx           — palette tweak for flat-bg contrast
+src/components/TerrariumApp.tsx             — mount BackgroundDoodles behind canvas
 ```
-
-## Build order (5 increments, each is shippable)
-
-### 1. Cozy 3D planet (foundation)
-- Full-screen R3F canvas, lavender→peach gradient background.
-- Low-poly icosphere displaced by simplex noise → continents.
-- Per-vertex colors by elevation/latitude: teal ocean, sage→olive land, off-white snow caps.
-- Soft key light + ambient + `ContactShadows` underneath (held-on-a-shelf feel).
-- `OrbitControls` with damping, zoom limits, gentle idle auto-rotate.
-- Thin atmosphere rim glow, slow "breathing" scale pulse, drifting cloud layer.
-- Day/night via slowly rotating key light; night side reveals subtle dark tone.
-
-### 2. World state + tick loop (the simulation under the hood)
-- Zustand store `useWorld` (single source of truth) with `persist` to localStorage.
-- One `useFrame` tick driver advances `life`, `era`, weather timers.
-- Visible state, not numeric:
-  - `life` rising → spawn more instanced low-poly houses + trees on land
-  - night side → warm window-lights fade in as `life` grows
-  - `weather` state → cloud density / rain particles / clear sky
-- Nothing numeric ever shown in UI.
-
-### 3. Intro: Gift → Name → Genesis (the entire tutorial)
-- **Beat 1 (Gift):** dimmed scene, cold grey sphere, one-line-at-a-time lore, single "Open the terrarium" button.
-- **Beat 2 (Name):** text field + 3 mythic suggestions + "surprise me" (procedural generator). Saved to store.
-- **Beat 3 (Genesis):** three sequential single-button steps, each with a clear visible result:
-  1. *Breathe warmth* → snow retreats, atmosphere glow appears
-  2. *Let it rain* → oceans fill with teal spread, clouds drift in
-  3. *Plant the first spark* → green point spreads, first house/person appears
-- Hand off to main view with era ribbon "The Age of First Light".
-
-### 4. Main HUD (cozy, sparse, one-thing-at-a-time)
-- Tailwind overlays with soft glassy cards, serif italics for flavor.
-- Era ribbon (top-center, name only).
-- Living-pulse indicator (top-left): pulsing dot + qualitative label ("a quiet seed", "a thriving world", "a restless world") derived from `life` + `traits`.
-- Choice-card slot (bottom-center) — only when a card is active.
-- Myth feed (right, max 3 visible, older cards fade).
-- God-action tray (bottom-right, 3 icons for MVP: send weather, drop a sign, withhold).
-- Sound toggle + menu (top-right) — toggle present but inert in MVP.
-- **Invariant:** only one primary overlay at a time.
-
-### 5. Choice + myth systems (the loop)
-- `ChoiceCard` type with `trigger(w)`, options, effects on traits/world/flags, optional myth.
-- Event scheduler picks one eligible card at a time when the player isn't mid-overlay; surfaces it with a soft rise animation.
-- Selecting an option: animates a visible world reaction (weather flips, bloom spreads, comet streaks), dismisses the card, queues myth.
-- **8–10 starter micro-choice cards** (stars/lie-or-truth, twins/blessing, mountain-naming, drought-village, two-prophets, etc.).
-- **God-action tray** writes ad-hoc choices into the same pipeline.
-- **Myth feed:** entries slide in with a warm "myth mote" particle rising from the planet.
-- **Guaranteed creation myth:** hard-scheduled at era 3 — *"the Warm One leaned close and the sea remembered how to move…"* — fires for every player regardless of choices.
-
-## Data model (locked for MVP, reserves Phase 2 hooks)
-
-```ts
-type Trait = 'faith' | 'curiosity' | 'fear' | 'harmony';
-
-interface WorldState {
-  planetName: string;
-  seed: number;
-  era: number;
-  ageName: string;
-  warmth: number;   // 0..1, internal only
-  water: number;    // 0..1, internal only
-  life: number;     // 0..1, internal only
-  traits: Record<Trait, number>;
-  weather: 'clear' | 'rain' | 'storm' | 'aurora' | null;
-  flags: Record<string, boolean>;  // includes substrate hook for v2
-  session: number;                 // increments per load (Phase 2 uses it)
-  intro: 'gift' | 'name' | 'warm' | 'water' | 'life' | 'done';
-}
-
-interface Person {
-  id: string;
-  name?: string;          // randomized for the followed one in Phase 2
-  lat: number; lon: number;
-  born: number;
-  isFollowed: boolean;
-  story: string[];
-}
-
-interface ChoiceCard {
-  id: string;
-  prompt: string;
-  sub?: string;
-  options: {
-    label: string;
-    ghost?: boolean;
-    effects: Partial<Record<Trait, number>>;
-    world?: Partial<WorldState>;
-    mythId?: string;
-  }[];
-  trigger: (w: WorldState) => boolean;
-  once?: boolean;
-}
-
-interface MythEntry { id: string; tag: string; text: string; era: number; }
-interface EraConfig { name: string; durationTicks: number; guaranteed?: string[]; }
-```
-
-## Phase 2 (deferred, not built this pass)
-
-Asha follow mechanic + raycast pick + "they speak to you" event · 5th-session meta beat · Reflections screen (S4) · audio (lo-fi loop, chimes, civ murmur via howler) · bloom postprocessing · Supabase cross-device · GLB art swap · substrate Easter egg.
 
 ## Technical notes
 
-- **Stack:** TanStack Start (already scaffolded) + React 19 + Tailwind v4. Add `three`, `@react-three/fiber`, `@react-three/drei`, `simplex-noise`, `zustand`.
-- **Routing:** single route `src/routes/index.tsx` renders the canvas + overlays. Intro is a state machine inside the store, not a separate route (keeps the planet always mounted).
-- **SSR:** R3F is client-only. Wrap the canvas in a client-only mount (dynamic import or `useEffect` mount flag) so SSR doesn't choke on `window`.
-- **Perf budget:** `dpr={[1,2]}`, instanced meshes for all props, low-detail icosphere (detail 4–5), one canvas.
-- **Save shape:** Zustand `persist` under key `terrarium:v1`. Migration field included for future bumps.
-- **Design tokens:** add cozy palette to `src/styles.css` (lavender, peach, sage, teal, snow, warm amber). All Tailwind classes resolve through tokens — no hardcoded hex in components.
-- **Typography:** install `@fontsource/fraunces` (serif italics for flavor) + `@fontsource/inter` (UI). Imported in root.
+- **Toon gradient map**: 3-step `DataTexture` with `NearestFilter` — created once, shared across all toon materials. Lives in `src/game/toon-gradient.ts`.
+- **Outline pattern**: per prop, render the same geometry a second time scaled ~1.04 with a `MeshBasicMaterial({ color: ink, side: BackSide })`. Free, no postprocessing pipeline needed, plays nicely with instancing.
+- **Prop instancing**: each sub-shape stays its own `InstancedMesh` (house bodies, roofs, chimneys, broadleaf foliage, pine foliage, trunks, rocks). The Planet component owns the surface sampling and dispatches matrices to each via refs in a single `useFrame` pass. Keeps the matrix updates O(n) and avoids per-prop React reconciliation.
+- **Sampling**: re-use existing `samplePlanetSurface`. Bump count to ~400, then partition deterministically into house / tree / rock slots so the layout is stable across reloads (driven by seed).
+- **Perf budget**: still one canvas, `dpr={[1,2]}`. Outline meshes double draw calls per prop *type* but each is still a single instanced draw, so we end up at ~16 draw calls for the diorama — fine.
+- No new packages required. Everything ships with `three`/`drei` already installed.
 
-## Acceptance for this MVP
+## Acceptance
 
-- [ ] Player understands what to do without reading anything outside the diegetic intro.
-- [ ] No numbers or sliders visible anywhere.
-- [ ] Planet is alive while idle (day/night, clouds, growth).
-- [ ] Every choice produces a visible world change and queues a myth.
-- [ ] Guaranteed creation myth fires by era 3 for every player.
-- [ ] Save persists across reloads.
-- [ ] Loads fast, smooth on a laptop, passes the "cup of warm tea" vibe check.
+- [ ] Flat saturated teal background, no gradient seams.
+- [ ] Planet reads as cel-shaded with a visible dark outline silhouette.
+- [ ] Trees and houses look like little objects (body + roof, trunk + foliage), not primitives.
+- [ ] Land surface visibly populates with dozens of props as `life` grows.
+- [ ] A handful of subtle hand-drawn doodles drift in the background behind the planet.
+- [ ] HUD remains readable against the new flat background.
+- [ ] No regressions to intro, choice, or myth systems.
