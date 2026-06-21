@@ -50,23 +50,28 @@ export function Diorama({ geom }: Props) {
 
 
   const slots = useMemo<Slot[]>(() => {
-    const samples = samplePlanetSurface(geom, seed, TOTAL);
+    // Sample each kind independently so rocks always get land-anchored samples.
+    // A shared pool can run short and leave InstancedMesh slots at the default
+    // identity matrix (full-size dodecahedrons stuck at world origin / floating
+    // off the planet silhouette).
+    const houseSamples = samplePlanetSurface(geom, seed, HOUSE_CAP);
+    const treeSamples = samplePlanetSurface(geom, seed + 7, TREE_CAP);
+    const rockSamples = samplePlanetSurface(geom, seed + 13, ROCK_CAP);
     const r = rng(seed + 99);
-    return samples.map((sample, i): Slot => {
-      let kind: Slot["kind"];
-      if (i < HOUSE_CAP) kind = "house";
-      else if (i < HOUSE_CAP + TREE_CAP) kind = "tree";
-      else kind = "rock";
-      return {
-        sample,
-        kind,
-        scale: 0.02 + r() * 0.012,
-        yaw: r() * Math.PI * 2,
-        treeSpecies: r() > 0.5 ? 0 : 1,
-        houseColor: new THREE.Color(HOUSE_PALETTE[Math.floor(r() * HOUSE_PALETTE.length)]),
-        roofColor: new THREE.Color(ROOF_PALETTE[Math.floor(r() * ROOF_PALETTE.length)]),
-      };
+    const mk = (sample: PlanetSample, kind: Slot["kind"]): Slot => ({
+      sample,
+      kind,
+      scale: 0.02 + r() * 0.012,
+      yaw: r() * Math.PI * 2,
+      treeSpecies: r() > 0.5 ? 0 : 1,
+      houseColor: new THREE.Color(HOUSE_PALETTE[Math.floor(r() * HOUSE_PALETTE.length)]),
+      roofColor: new THREE.Color(ROOF_PALETTE[Math.floor(r() * ROOF_PALETTE.length)]),
     });
+    return [
+      ...houseSamples.map((s) => mk(s, "house")),
+      ...treeSamples.map((s) => mk(s, "tree")),
+      ...rockSamples.map((s) => mk(s, "rock")),
+    ];
   }, [geom, seed]);
 
   const houses = slots.filter((s) => s.kind === "house");
