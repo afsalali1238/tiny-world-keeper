@@ -45,7 +45,8 @@ const initialWorld: WorldState = {
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
 let tickAccumulator = 0;
-let choiceCooldown = 0;
+let choiceCooldown = 30; // start gently: no choices for the first ~30s
+let effectId = 1;
 
 function addMyth(state: WorldState, mythId: string): Partial<WorldState> {
   if (state.firedMythIds.includes(mythId)) return {};
