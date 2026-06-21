@@ -14,6 +14,7 @@ export type NarratorTrigger =
   | "fifthVisit"
   | "uncanny"
   | "pivot"
+  | "whisper"
   | "combo:steam"
   | "combo:bloom"
   | "combo:drought"
