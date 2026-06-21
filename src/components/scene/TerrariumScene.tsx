@@ -62,6 +62,8 @@ export function TerrariumScene() {
         <Planet cold={intro === "gift"} />
         {intro !== "gift" && <Clouds />}
         {intro === "done" && <Aurora />}
+        {intro === "done" && <TouchEffects />}
+
         <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
         <OrbitControls
           enablePan={false}
