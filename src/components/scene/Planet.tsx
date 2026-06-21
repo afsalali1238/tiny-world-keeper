@@ -1,10 +1,11 @@
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { buildPlanetGeometry } from "@/game/planet-geometry";
 import { useWorld } from "@/game/store";
 import { getToonGradient, INK } from "@/game/toon-gradient";
 import { Diorama } from "./Diorama";
+import { TouchEffects } from "./TouchEffects";
 
 interface Props {
   cold?: boolean;
