@@ -221,6 +221,17 @@ export const useWorld = create<WorldState & Actions>()(
           patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
         }
 
+        // Rare direct address from the followed villager. Once, after era 2.
+        if (
+          s.followed &&
+          !s.followed.pendingAddress &&
+          !s.flags["followed:addressed"] &&
+          s.era >= 2 &&
+          Math.random() < 0.004
+        ) {
+          patch.followed = { ...s.followed, pendingAddress: true };
+        }
+
         const now = Date.now();
         const liveEffects = s.effects.filter((e) => now - e.bornAt < 2000);
         if (liveEffects.length !== s.effects.length) patch.effects = liveEffects;
