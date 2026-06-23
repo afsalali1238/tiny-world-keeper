@@ -282,7 +282,14 @@ export function Diorama({ geom }: Props) {
     }
 
     // night lights — one per house, only on night side. Bigger + a halo so they read at distance.
-    const lightDir = new THREE.Vector3(2, 1.2, 1.8).normalize();
+    // Sun direction matches SunLight.tsx so the terminator lines up with actual lighting.
+    const t = state.clock.elapsedTime;
+    const sunSpeed = useWorld.getState().intro === "done" ? 0.06 : 0.02;
+    const lightDir = new THREE.Vector3(
+      Math.cos(t * sunSpeed) * 5,
+      1.6,
+      Math.sin(t * sunSpeed) * 5,
+    ).normalize();
     const parentRot = (lightsRef.current?.parent?.parent?.rotation as THREE.Euler) ?? new THREE.Euler();
     houses.forEach((s, i) => {
       if (i >= LIGHT_CAP) return;
