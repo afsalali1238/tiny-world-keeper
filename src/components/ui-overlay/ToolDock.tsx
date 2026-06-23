@@ -48,8 +48,8 @@ export function ToolDock() {
   const selectedTool = useWorld((s) => s.selectedTool);
   const setTool = useWorld((s) => s.setTool);
 
-  // Hide entirely during the very-first beats and the "pour" climax.
-  if (intro === "gift" || intro === "name" || intro === "pour") return null;
+  // Hide throughout Genesis. The dock is for free play only.
+  if (intro !== "done") return null;
 
   const lockedTool = INTRO_TOOL[intro] ?? null;
   const active = TOOLS.find((t) => t.kind === selectedTool);
