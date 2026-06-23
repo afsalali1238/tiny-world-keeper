@@ -444,19 +444,41 @@ export const useWorld = create<WorldState & Actions>()(
         set(patch);
       },
 
-      reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
+      reset: () => {
+        // Hard reset: wipe persisted state and reload so the renderer comes up
+        // fresh in `intro: "gift"` with no stale R3F objects, choice cards, or
+        // ambient audio holding the main thread.
+        try {
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem("terrarium:v1");
+            window.location.reload();
+            return;
+          }
+        } catch {
+          // fall through to in-memory reset
+        }
+        set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) });
+      },
     }),
     {
       name: "terrarium:v1",
       version: 4,
       migrate: (persisted: unknown, _version: number) => {
         const p = (persisted ?? {}) as Partial<WorldState>;
-        // Old intro flow had a "pour" jar step that no longer exists.
-        // Lift those players into the live world rather than soft-lock them.
         let intro = p.intro;
-        if (intro === "pour") intro = "done";
+        // Legacy "pour" was a removed jar step. Send those saves to the naming
+        // beat so they still get the final genesis moment, not straight to done.
+        if (intro === "pour") intro = "name";
         const validIntros = new Set(["gift", "warm", "spray", "seed", "name", "done"]);
         if (!intro || !validIntros.has(intro)) intro = "gift";
+        // GUARD: if the persisted save has no real progress (no name, no ticks,
+        // no myths) then it's effectively a fresh player. Force them to genesis
+        // no matter what `intro` claimed — this is the brand-new-player bug.
+        const looksEmpty =
+          (!p.planetName || p.planetName.trim() === "") &&
+          (p.ticks ?? 0) === 0 &&
+          (!p.myths || p.myths.length === 0);
+        if (looksEmpty) intro = "gift";
         return {
           ...p,
           intro,
@@ -497,6 +519,24 @@ export const useWorld = create<WorldState & Actions>()(
         if (!state) return;
         state.session = (state.session ?? 0) + 1;
         state.activeChoiceId = null;
+        // Same guard as migrate: any save with no real progress is treated as
+        // a fresh player and routed to the gift beat. Belt and braces — migrate
+        // only fires on version bumps, this fires every load.
+        const looksEmpty =
+          (!state.planetName || state.planetName.trim() === "") &&
+          (state.ticks ?? 0) === 0 &&
+          (!state.myths || state.myths.length === 0);
+        if (looksEmpty) {
+          state.intro = "gift";
+          state.era = 0;
+          state.ageName = ERAS[0].name;
+          state.firedMythIds = [];
+          state.myths = [];
+          state.life = 0;
+          state.warmth = 0;
+          state.water = 0;
+          state.weather = null;
+        }
         // Compute offline gap if we have a prior visit and the world is alive.
         const last = state.lastSeenAt;
         if (last && state.intro === "done") {
