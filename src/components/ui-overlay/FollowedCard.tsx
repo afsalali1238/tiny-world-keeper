@@ -56,7 +56,16 @@ export function FollowedCard() {
   const era = useWorld((s) => s.era);
   const weather = useWorld((s) => s.weather);
   const traits = useWorld((s) => s.traits);
+  const activeChoiceId = useWorld((s) => s.activeChoiceId);
   const [tick, setTick] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!followed) return;
+    setExpanded(true);
+    const collapse = setTimeout(() => setExpanded(false), 5000);
+    return () => clearTimeout(collapse);
+  }, [followed]);
 
   useEffect(() => {
     if (!followed) return;
@@ -74,21 +83,33 @@ export function FollowedCard() {
 
   if (!followed) return null;
 
+  // Hide the expanded body while a choice card is up to avoid stacking.
+  const showBody = expanded && !activeChoiceId;
+
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-28 z-30 flex justify-center px-4">
-      <div className="terrarium-rise pointer-events-auto flex max-w-md flex-col items-center gap-1 rounded-3xl bg-card/90 px-5 py-3 text-center shadow-md backdrop-blur-md">
-        <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/45">
-          you are watching
-        </p>
-        <p className="font-serif text-lg italic text-foreground/90">{followed.name}</p>
-        <p className="mt-1 font-serif text-sm italic leading-snug text-foreground/70">{line}</p>
-        <button
-          onClick={() => unfollow()}
-          className="mt-2 rounded-full px-3 py-1 font-serif text-[11px] italic text-foreground/55 transition hover:bg-secondary/70 hover:text-foreground/85"
-        >
-          let them go
-        </button>
-      </div>
+    <div className="pointer-events-auto absolute left-4 top-28 z-30 max-w-[min(18rem,70vw)]">
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center gap-2 rounded-full bg-card/85 px-3 py-1.5 shadow-sm backdrop-blur-md transition hover:bg-card/95"
+        title={showBody ? "hide" : "show what they're doing"}
+      >
+        <span className="terrarium-pulse h-2 w-2 rounded-full bg-accent" />
+        <span className="font-serif text-[10px] uppercase tracking-[0.28em] text-foreground/50">
+          watching
+        </span>
+        <span className="font-serif text-sm italic text-foreground/90">{followed.name}</span>
+      </button>
+      {showBody && (
+        <div className="terrarium-rise mt-2 rounded-2xl bg-card/85 px-4 py-3 shadow-sm backdrop-blur-md">
+          <p className="font-serif text-xs italic leading-snug text-foreground/75">{line}</p>
+          <button
+            onClick={() => unfollow()}
+            className="mt-2 rounded-full px-2 py-0.5 font-serif text-[10px] italic text-foreground/50 transition hover:bg-secondary/70 hover:text-foreground/85"
+          >
+            let them go
+          </button>
+        </div>
+      )}
     </div>
   );
 }
