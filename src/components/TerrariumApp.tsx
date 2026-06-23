@@ -16,6 +16,7 @@ import { Hints } from "@/components/ui-overlay/Hints";
 import { ComboFlash } from "@/components/ui-overlay/ComboFlash";
 import { GestureSounds } from "@/components/ui-overlay/GestureSounds";
 import { HowToPlay, useHowToPlay } from "@/components/ui-overlay/HowToPlay";
+import { FollowedCard } from "@/components/ui-overlay/FollowedCard";
 
 
 import { useWorld } from "@/game/store";
