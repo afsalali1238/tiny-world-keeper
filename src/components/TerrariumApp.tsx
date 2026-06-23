@@ -25,7 +25,15 @@ export function TerrariumApp() {
   const intro = useWorld((s) => s.intro);
   const touchLastSeen = useWorld((s) => s.touchLastSeen);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [washGone, setWashGone] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    // Keep the "small world is waking" wash visible until the first WebGL
+    // frames have a chance to paint — otherwise on slow connections you see
+    // a beat of bare teal between mount and scene-ready.
+    const t = setTimeout(() => setWashGone(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
   const howto = useHowToPlay();
 
   // Persist "last seen" so we can compute the offline gap on return.
@@ -47,9 +55,12 @@ export function TerrariumApp() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background">
       <BackgroundDoodles />
-      {/* soft loading wash so the first frame is never bare teal */}
-      {!mounted && (
-        <div className="absolute inset-0 z-20 grid place-items-center">
+      {/* soft loading wash — stays painted until the scene has a chance to render */}
+      {!washGone && (
+        <div
+          className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-background transition-opacity duration-700"
+          style={{ opacity: mounted ? 0.55 : 1 }}
+        >
           <p className="terrarium-fade font-serif text-sm italic text-foreground/40">
             a small world is waking…
           </p>
@@ -60,6 +71,7 @@ export function TerrariumApp() {
           <TerrariumScene />
         </div>
       )}
+
 
 
       {/* ToolDock hides while a choice is open so the card never collides with it */}
