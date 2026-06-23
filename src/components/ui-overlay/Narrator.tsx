@@ -145,18 +145,36 @@ export function Narrator() {
       useWorld.getState().narrate({ id: chosen.id, text: chosen.text, bornAt: now });
     };
 
-    // Fifth-visit fires once shortly after entry.
-    const fifthTimer = setTimeout(() => {
+    // Fifth-visit (the meta beat). Retries every 10s for up to 3 min so it
+    // still lands if the user is mid-choice or mid-narration when we arrive.
+    // Without this, sessions where a choice card was open on entry would
+    // silently skip the line — the whole emotional payload of the game.
+    let fifthInterval: ReturnType<typeof setInterval> | null = null;
+    let fifthTries = 0;
+    const tryFifth = () => {
       const s = useWorld.getState();
-      if (s.session >= 5 && !s.fifthFired) {
-        const line = pickLine("fifthVisit", []);
-        if (line) {
-          lastNarratedAt = Date.now();
-          useWorld.getState().narrate({ id: line.id, text: line.text, bornAt: Date.now() });
-          useWorld.getState().markFifthFired();
-        }
+      if (s.fifthFired) {
+        if (fifthInterval) clearInterval(fifthInterval);
+        return;
       }
+      if (s.session < 5) return;
+      if (s.activeChoiceId || s.currentNarration) return;
+      const line = pickLine("fifthVisit", []);
+      if (!line) return;
+      lastNarratedAt = Date.now();
+      useWorld.getState().narrate({ id: line.id, text: line.text, bornAt: Date.now() });
+      useWorld.getState().markFifthFired();
+      if (fifthInterval) clearInterval(fifthInterval);
+    };
+    const fifthTimer = setTimeout(() => {
+      tryFifth();
+      fifthInterval = setInterval(() => {
+        fifthTries += 1;
+        tryFifth();
+        if (fifthTries > 18 && fifthInterval) clearInterval(fifthInterval);
+      }, 10_000);
     }, 6000);
+
 
     // The Pivot: one-shot, fires once playMs crosses ~25 minutes.
     const PIVOT_MS = 25 * 60_000;
