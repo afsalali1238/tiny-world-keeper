@@ -575,8 +575,6 @@ export const useWorld = create<WorldState & Actions>()(
 // through the WebGL canvas.
 if (typeof window !== "undefined") {
   (window as unknown as { __terrarium: typeof useWorld }).__terrarium = useWorld;
-  // eslint-disable-next-line no-console
-  console.log("[terrarium] store attached to window.__terrarium");
 }
 
 
