@@ -18,6 +18,7 @@ export function Planet({ cold = false }: Props) {
   const intro = useWorld((s) => s.intro);
   const selectedTool = useWorld((s) => s.selectedTool);
   const applyToolAt = useWorld((s) => s.applyToolAt);
+  const followPerson = useWorld((s) => s.followPerson);
 
   const geom = useMemo(() => buildPlanetGeometry(seed), [seed]);
   const groupRef = useRef<THREE.Group>(null);
@@ -101,12 +102,16 @@ export function Planet({ cold = false }: Props) {
   const showAtmo = !cold && intro !== "gift";
 
   const handlePlanetDown = (e: ThreeEvent<PointerEvent>) => {
-    if (!selectedTool) return;
     if (intro === "gift" || intro === "name" || intro === "pour") return;
     e.stopPropagation();
     const local = e.point.clone();
     if (planetRef.current) planetRef.current.worldToLocal(local);
-    applyToolAt([local.x, local.y, local.z]);
+    if (selectedTool) {
+      applyToolAt([local.x, local.y, local.z]);
+    } else if (intro === "done") {
+      // No tool? Adopt a small life from where you touched.
+      followPerson([local.x, local.y, local.z]);
+    }
   };
 
   return (

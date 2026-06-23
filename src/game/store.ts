@@ -7,6 +7,7 @@ import { MYTH_LIBRARY } from "./myths";
 import { CURIOSITIES } from "./curiosities";
 import { detectCombo } from "./combos";
 import { rememberKeeper } from "./keepers";
+import { randomMythicName } from "./names";
 
 export interface NarrationCue {
   id: string;
@@ -40,6 +41,8 @@ interface Actions {
 
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
+  followPerson: (pos: [number, number, number]) => void;
+  unfollowPerson: () => void;
   reset: () => void;
 }
 
@@ -77,6 +80,7 @@ const initialWorld: WorldState = {
   lastSeenAt: null,
   offlineGapMs: null,
   recentCombo: null,
+  followed: null,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -382,6 +386,13 @@ export const useWorld = create<WorldState & Actions>()(
       clearOfflineGap: () => set({ offlineGapMs: null }),
 
       touchLastSeen: () => set({ lastSeenAt: Date.now() }),
+
+      followPerson: (pos) => {
+        const name = randomMythicName();
+        set({ followed: { name, pos, adoptedAt: Date.now() } });
+      },
+
+      unfollowPerson: () => set({ followed: null }),
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),

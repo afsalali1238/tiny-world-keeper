@@ -55,6 +55,8 @@ export interface WorldState {
   offlineGapMs: number | null;
   // Consequence pack
   recentCombo: { kind: "steam" | "bloom" | "drought" | "exodus"; ts: number } | null;
+  // Followed person (a single villager you've adopted)
+  followed: { name: string; pos: [number, number, number]; adoptedAt: number } | null;
 }
 
 export interface MythEntry {
