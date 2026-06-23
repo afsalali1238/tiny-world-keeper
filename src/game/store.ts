@@ -77,6 +77,7 @@ const initialWorld: WorldState = {
   lastSeenAt: null,
   offlineGapMs: null,
   recentCombo: null,
+  followed: null,
 };
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
