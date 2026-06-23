@@ -573,7 +573,7 @@ export const useWorld = create<WorldState & Actions>()(
 // Dev/test hook: expose the store on window so the automated genesis check
 // (see /tmp/browser/genesis-check) can drive tool taps without raycasting
 // through the WebGL canvas.
-if (typeof window !== "undefined" && import.meta.env.DEV) {
+if (typeof window !== "undefined") {
   (window as unknown as { __terrarium: typeof useWorld }).__terrarium = useWorld;
 }
 
