@@ -4,12 +4,12 @@ export function EraRibbon() {
   const ageName = useWorld((s) => s.ageName);
   const planetName = useWorld((s) => s.planetName);
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-2">
-      <div className="flex flex-col items-center rounded-full bg-card/75 px-4 py-1.5 text-center shadow-sm backdrop-blur-md">
-        <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/55">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-3 px-3">
+      <div className="flex max-w-[88vw] flex-col items-center rounded-full bg-card/85 px-5 py-2 text-center shadow-md backdrop-blur-md">
+        <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/55 truncate max-w-full">
           {planetName}
         </p>
-        <p className="font-serif text-base italic leading-tight text-foreground/90 md:text-lg">
+        <p className="font-serif text-base italic leading-tight text-foreground/90 md:text-lg truncate max-w-full">
           {ageName}
         </p>
       </div>
