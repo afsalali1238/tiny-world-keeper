@@ -340,7 +340,7 @@ export function Diorama({ geom }: Props) {
     [
       houseBodyRef, houseBodyOutlineRef, houseRoofRef, houseRoofOutlineRef,
       broadleafRef, broadleafOutlineRef, pineRef, pineOutlineRef,
-      trunkRef, rockRef, rockOutlineRef, lightsRef,
+      trunkRef, rockRef, rockOutlineRef, lightsRef, lightHaloRef,
     ].forEach((r) => {
       if (r.current) r.current.instanceMatrix.needsUpdate = true;
     });
