@@ -21,7 +21,10 @@ export function LivingPulse() {
   const life = useWorld((s) => s.life);
   const label = lifeLabel(life);
   return (
-    <div className="pointer-events-none absolute left-5 top-16 z-20 flex items-center gap-2.5">
+    <div
+      className="pointer-events-none absolute left-5 z-20 flex items-center gap-2.5 safe-offset-top safe-left"
+      style={{ ["--safe-top-base" as string]: "4rem" }}
+    >
       <span className="terrarium-pulse h-2.5 w-2.5 rounded-full bg-accent" />
       <span className="font-serif text-xs italic text-foreground/75">{label}</span>
     </div>
