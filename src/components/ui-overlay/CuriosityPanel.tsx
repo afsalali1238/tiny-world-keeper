@@ -90,7 +90,7 @@ export function CuriosityPanel() {
                     }
                   >
                     <p className={"font-serif text-sm " + (got ? "italic text-foreground/85" : "text-foreground/45")}>
-                      {got ? c.label : "—  —  —"}
+                      {got ? c.label : "· · ·"}
                     </p>
                     {got && (
                       <p className="mt-0.5 font-serif text-xs text-foreground/60">{c.hint}</p>
@@ -121,7 +121,7 @@ export function CuriosityPanel() {
                         }
                       >
                         <p className={"font-serif text-sm " + (got ? "italic text-foreground/85" : "text-foreground/45")}>
-                          {got ? c.label : "—  —  —"}
+                          {got ? c.label : "· · ·"}
                         </p>
                         {got && (
                           <p className="mt-0.5 font-serif text-xs text-foreground/60">{c.hint}</p>
