@@ -91,6 +91,8 @@ export function Diorama({ geom }: Props) {
   const rockRef = useRef<THREE.InstancedMesh>(null);
   const rockOutlineRef = useRef<THREE.InstancedMesh>(null);
   const lightsRef = useRef<THREE.InstancedMesh>(null);
+  const lightHaloRef = useRef<THREE.InstancedMesh>(null);
+
 
   const gradient = useMemo(() => getToonGradient(), []);
 
