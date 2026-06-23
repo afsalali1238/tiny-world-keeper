@@ -18,6 +18,7 @@ export function Planet({ cold = false }: Props) {
   const intro = useWorld((s) => s.intro);
   const selectedTool = useWorld((s) => s.selectedTool);
   const applyToolAt = useWorld((s) => s.applyToolAt);
+  const followPerson = useWorld((s) => s.followPerson);
 
   const geom = useMemo(() => buildPlanetGeometry(seed), [seed]);
   const groupRef = useRef<THREE.Group>(null);
