@@ -63,6 +63,7 @@ export function TerrariumApp() {
           <SpeedDial />
           <MythFeed />
           <ChoiceCard />
+          <FollowedCard />
           <CuriosityPanel />
           <CuriosityToast />
           <Narrator />
