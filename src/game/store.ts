@@ -9,6 +9,25 @@ import { detectCombo } from "./combos";
 import { rememberKeeper } from "./keepers";
 import { randomMythicName } from "./names";
 
+// Dev/test hook: `?fresh=1` wipes the persisted save BEFORE zustand hydrates
+// so automated checks (and humans replaying genesis) always land at the gift
+// beat. The query param is stripped from the URL so a refresh doesn't re-wipe.
+if (typeof window !== "undefined") {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("fresh") === "1") {
+      window.localStorage.removeItem("terrarium:v1");
+      params.delete("fresh");
+      const qs = params.toString();
+      const url = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+      window.history.replaceState(null, "", url);
+    }
+  } catch {
+    // ignore — storage may be blocked in some embeds
+  }
+}
+
+
 export interface NarrationCue {
   id: string;
   text: string;
@@ -550,6 +569,14 @@ export const useWorld = create<WorldState & Actions>()(
     },
   ),
 );
+
+// Dev/test hook: expose the store on window so the automated genesis check
+// (see /tmp/browser/genesis-check) can drive tool taps without raycasting
+// through the WebGL canvas.
+if (typeof window !== "undefined") {
+  (window as unknown as { __terrarium: typeof useWorld }).__terrarium = useWorld;
+}
+
 
 export function lifeLabel(life: number): string {
   if (life < 0.05) return "a quiet seed";
