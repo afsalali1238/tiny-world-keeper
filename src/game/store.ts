@@ -131,7 +131,21 @@ export const useWorld = create<WorldState & Actions>()(
       setIntro: (intro) => set({ intro }),
       setPlanetName: (planetName) => {
         rememberKeeper(planetName);
-        set({ planetName, intro: "spray", selectedTool: "rain", warmth: 0, water: 0, life: 0 });
+        const s = get();
+        // Naming is the LAST genesis beat. Open the world for real:
+        // pour the first people, set the opening age, fire the creation myth.
+        let patch: Partial<WorldState> = {
+          planetName,
+          intro: "done",
+          selectedTool: null,
+          life: Math.max(s.life, 0.45),
+          weather: "aurora",
+          ageName: ERAS[0].name,
+          era: 0,
+          flags: { ...s.flags, "intro:poured": true },
+        };
+        patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
+        set(patch);
       },
 
       // Legacy intro actions (kept for backward compat; new flow uses tool taps).
@@ -141,7 +155,7 @@ export const useWorld = create<WorldState & Actions>()(
 
       pourPeople: () => {
         const s = get();
-        // Dramatic jump: scatter people across the world.
+        // Legacy: previously a separate jar step. Kept so old saves don't crash.
         set({
           life: Math.max(s.life, 0.45),
           weather: "aurora",
