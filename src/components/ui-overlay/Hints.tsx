@@ -27,12 +27,21 @@ const HINTS: Hint[] = [
     show: (s) => s.intro === "done" && s.speed === 1,
   },
   {
+    id: "follow",
+    text: "drop your tool, then tap the world to follow a small life",
+    position: "bottom-24 left-1/2 -translate-x-1/2",
+    delayMs: 45_000,
+    show: (s) =>
+      s.intro === "done" && !s.followed && !s.selectedTool && s.life > 0.15,
+  },
+  {
     id: "curiosities",
     text: "things you have noticed live here",
     position: "bottom-16 left-5",
     delayMs: 800,
     show: (s) => s.intro === "done" && s.unlockedCuriosityIds.length >= 1,
   },
+
 ];
 
 function loadSeen(): Set<string> {
