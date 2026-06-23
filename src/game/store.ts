@@ -519,6 +519,24 @@ export const useWorld = create<WorldState & Actions>()(
         if (!state) return;
         state.session = (state.session ?? 0) + 1;
         state.activeChoiceId = null;
+        // Same guard as migrate: any save with no real progress is treated as
+        // a fresh player and routed to the gift beat. Belt and braces — migrate
+        // only fires on version bumps, this fires every load.
+        const looksEmpty =
+          (!state.planetName || state.planetName.trim() === "") &&
+          (state.ticks ?? 0) === 0 &&
+          (!state.myths || state.myths.length === 0);
+        if (looksEmpty) {
+          state.intro = "gift";
+          state.era = 0;
+          state.ageName = ERAS[0].name;
+          state.firedMythIds = [];
+          state.myths = [];
+          state.life = 0;
+          state.warmth = 0;
+          state.water = 0;
+          state.weather = null;
+        }
         // Compute offline gap if we have a prior visit and the world is alive.
         const last = state.lastSeenAt;
         if (last && state.intro === "done") {
