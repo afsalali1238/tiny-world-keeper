@@ -45,7 +45,8 @@ export function CuriosityPanel() {
         onClick={() => setOpen(true)}
         title="curiosities"
         aria-label="curiosities"
-        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-grid h-9 w-9 place-items-center rounded-full bg-card/80 backdrop-blur shadow-sm hover:bg-card"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-grid h-9 w-9 place-items-center rounded-full bg-card/80 backdrop-blur shadow-sm hover:bg-card safe-offset-bottom safe-left"
+        style={{ ["--safe-bottom-base" as string]: "1.25rem" }}
       >
         <span className="font-serif text-base italic text-foreground/70">✦</span>
         {hasUnseen && (
