@@ -52,11 +52,12 @@ export function TerrariumScene() {
   const cold = intro === "gift" || intro === "warm";
   const showClouds = intro === "seed" || intro === "name" || intro === "done";
   const showSurface = intro !== "gift" && intro !== "name";
+  const isNarrow = typeof window !== "undefined" && window.innerWidth < 720;
   return (
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.2, 3.35], fov: 32 }}
+      camera={{ position: [0, 0.2, isNarrow ? 5.2 : 3.35], fov: isNarrow ? 36 : 32 }}
       gl={{ antialias: true }}
     >
       <SceneBackground />
