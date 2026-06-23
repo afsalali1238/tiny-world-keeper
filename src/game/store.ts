@@ -7,6 +7,7 @@ import { MYTH_LIBRARY } from "./myths";
 import { CURIOSITIES } from "./curiosities";
 import { detectCombo } from "./combos";
 import { rememberKeeper } from "./keepers";
+import { randomMythicName } from "./names";
 
 export interface NarrationCue {
   id: string;
