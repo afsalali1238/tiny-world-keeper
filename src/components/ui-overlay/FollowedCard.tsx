@@ -28,7 +28,7 @@ function pickVignette(
   if (era <= 0) {
     pool.push(`${name} eats a piece of fruit they didn't know had a name yet.`);
   } else if (era === 1) {
-    pool.push(`${name} carves a small mark into a beam — (a year, a debt, a child).`);
+    pool.push(`${name} carves a small mark into a beam (a year, a debt, a child).`);
   } else if (era === 2) {
     pool.push(`${name} reads a letter twice and folds it carefully into a pocket.`);
   } else {
