@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Planet } from "./Planet";
@@ -54,7 +54,7 @@ export function TerrariumScene() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.25, 2.55], fov: 36 }}
+      camera={{ position: [0, 0.2, 3.35], fov: 32 }}
       gl={{ antialias: true }}
     >
       <SceneBackground />
@@ -65,7 +65,7 @@ export function TerrariumScene() {
         {intro === "done" && <Aurora />}
         {showSurface && <TouchEffects />}
 
-        <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
+        {/* contact shadow removed — was reading as a grey placeholder disc under the planet */}
         <OrbitControls
           enablePan={false}
           enableZoom={true}
