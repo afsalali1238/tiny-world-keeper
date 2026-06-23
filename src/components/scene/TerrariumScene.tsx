@@ -49,6 +49,8 @@ function SceneBackground() {
 
 export function TerrariumScene() {
   const intro = useWorld((s) => s.intro);
+  const cold = intro === "gift" || intro === "warm";
+  const showClouds = intro === "seed" || intro === "name" || intro === "done";
   const showSurface = intro !== "gift" && intro !== "name";
   return (
     <Canvas
@@ -60,8 +62,8 @@ export function TerrariumScene() {
       <SceneBackground />
       <Suspense fallback={null}>
         <SunLight />
-        <Planet cold={intro === "gift"} />
-        {intro !== "gift" && <Clouds />}
+        <Planet cold={cold} />
+        {showClouds && <Clouds />}
         {intro === "done" && <Aurora />}
         {showSurface && <TouchEffects />}
 

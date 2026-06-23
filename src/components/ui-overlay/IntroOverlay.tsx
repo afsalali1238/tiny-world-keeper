@@ -4,76 +4,57 @@ import { NAME_SUGGESTIONS, randomMythicName } from "@/game/names";
 import { loadKeepers } from "@/game/keepers";
 
 const GIFT_LINES = [
-  "Every Keeper is given one.",
-  "A world, small enough to hold. Real enough to matter.",
-  "The last one who held it is gone now. It's yours.",
-  "It's cold. It's waiting.",
+  "This one is yours now.",
+  "It is cold, and it is waiting.",
 ];
 
-const STEP_PROMPT: Record<"spray" | "warm" | "seed", { title: string; sub: string }> = {
-  spray: {
-    title: "A gift. A small dead rock.",
-    sub: "Spray it. Tap the surface with the rain.",
-  },
+const STEP_PROMPT: Record<"warm" | "spray" | "seed", { title: string; sub: string }> = {
   warm: {
-    title: "Warm it.",
-    sub: "Tap the surface with the sun.",
+    title: "Touch the world to warm it.",
+    sub: "Warmth first. Everything else is built on it.",
+  },
+  spray: {
+    title: "Touch the world to bring water.",
+    sub: "Warmth alone is a desert. A world needs seas.",
   },
   seed: {
-    title: "Give it life.",
-    sub: "Tap the land with the seed. A few times.",
+    title: "Touch the world to plant the first life.",
+    sub: "Now the first brave, foolish thing.",
   },
 };
 
 export function IntroOverlay() {
   const intro = useWorld((s) => s.intro);
   const setIntro = useWorld((s) => s.setIntro);
+  const setTool = useWorld((s) => s.setTool);
   const setPlanetName = useWorld((s) => s.setPlanetName);
-  const pourPeople = useWorld((s) => s.pourPeople);
 
   if (intro === "done") return null;
-  if (intro === "gift") return <GiftBeat onOpen={() => setIntro("name")} />;
-  if (intro === "name") return <NameBeat onName={setPlanetName} />;
-
-  if (intro === "pour") {
+  if (intro === "gift")
     return (
-      <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex flex-col items-center gap-2 px-6 text-center">
-        <p className="terrarium-fade font-serif text-xl italic text-foreground md:text-2xl">
-          Now give it someone to live there.
-        </p>
-        <p className="terrarium-fade font-serif text-sm italic text-foreground/65">
-          Tap the jar. Pour them out.
-        </p>
-        <button
-          onClick={pourPeople}
-          className="terrarium-rise pointer-events-auto mt-6 flex flex-col items-center gap-2"
-          aria-label="Pour the first people onto the world"
-        >
-          <span className="grid h-20 w-16 place-items-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-foreground/70 bg-card/70 pb-1 backdrop-blur transition hover:scale-[1.04]">
-            <span className="flex gap-0.5">
-              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
-              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
-              <span className="block h-1.5 w-1.5 rounded-full bg-foreground/80" />
-            </span>
-          </span>
-          <span className="font-serif text-xs italic text-foreground/60">a jar of people</span>
-        </button>
-      </div>
+      <GiftBeat
+        onOpen={() => {
+          // Genesis begins: warm step, sun tool pre-equipped, no menus.
+          setTool("sun");
+          setIntro("warm");
+        }}
+      />
     );
-  }
+  if (intro === "name") return <NameBeat onName={setPlanetName} />;
+  if (intro === "pour") return null; // legacy step, no UI
 
-  // spray | warm | seed
+  // warm | spray | seed
   const copy = STEP_PROMPT[intro];
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex flex-col items-center gap-1 px-6 text-center">
+    <div className="pointer-events-none absolute inset-x-0 bottom-12 z-30 flex flex-col items-center gap-1 px-6 text-center">
       <p
         key={intro}
-        className="terrarium-fade font-serif text-xl italic text-foreground md:text-2xl"
+        className="terrarium-fade font-serif text-xl italic text-foreground/90 md:text-2xl"
       >
         {copy.title}
       </p>
-      <p className="terrarium-fade font-serif text-sm italic text-foreground/65">{copy.sub}</p>
+      <p className="terrarium-fade font-serif text-sm italic text-foreground/60">{copy.sub}</p>
     </div>
   );
 }
@@ -88,12 +69,13 @@ function GiftBeat({ onOpen }: { onOpen: () => void }) {
   }, [shown]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-end bg-background/40 pb-24 backdrop-blur-[2px]">
-      <div className="flex flex-col items-center gap-3 px-6 text-center">
+    // No backdrop blur. The cold planet must be visible behind every line.
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center pb-10">
+      <div className="flex flex-col items-center gap-2 px-6 text-center">
         {GIFT_LINES.slice(0, shown).map((line, i) => (
           <p
             key={i}
-            className="terrarium-fade font-serif text-xl italic text-foreground/85 md:text-2xl"
+            className="terrarium-fade font-serif text-lg italic text-foreground/85 md:text-xl"
           >
             {line}
           </p>
@@ -102,20 +84,20 @@ function GiftBeat({ onOpen }: { onOpen: () => void }) {
       {shown >= GIFT_LINES.length && (
         <>
           {keepers.length > 0 && (
-            <div className="terrarium-fade mt-8 max-w-md px-6 text-center">
+            <div className="terrarium-fade mt-5 max-w-md px-6 text-center">
               <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-foreground/40">
                 former keepers
               </p>
-              <p className="mt-2 font-serif text-sm italic text-foreground/55">
+              <p className="mt-1 font-serif text-xs italic text-foreground/55">
                 {keepers.slice(0, 6).join("  ·  ")}
               </p>
             </div>
           )}
           <button
             onClick={onOpen}
-            className="terrarium-rise pointer-events-auto mt-8 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition hover:scale-[1.03]"
+            className="terrarium-rise pointer-events-auto mt-5 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition hover:scale-[1.03]"
           >
-            Open the terrarium
+            Begin
           </button>
         </>
       )}
@@ -132,8 +114,13 @@ function NameBeat({ onName }: { onName: (n: string) => void }) {
   };
   return (
     <div className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center pb-20">
-      <div className="terrarium-rise pointer-events-auto flex w-[min(440px,90vw)] flex-col gap-5 rounded-2xl bg-card/85 p-7 text-center backdrop-blur-xl">
-        <p className="font-serif text-xl italic text-foreground">Every world deserves a name.</p>
+      <div className="terrarium-rise pointer-events-auto flex w-[min(440px,90vw)] flex-col gap-4 rounded-2xl bg-card/90 p-6 text-center backdrop-blur-xl">
+        <p className="font-serif text-lg italic text-foreground/85">
+          Every world deserves a name.
+        </p>
+        <p className="font-serif text-xs italic text-foreground/55">
+          What will you call this one?
+        </p>
         <input
           autoFocus
           value={value}
@@ -164,7 +151,7 @@ function NameBeat({ onName }: { onName: (n: string) => void }) {
           disabled={!value.trim()}
           className="mt-1 rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:scale-[1.03] disabled:opacity-40"
         >
-          Name it
+          Then it begins
         </button>
       </div>
     </div>

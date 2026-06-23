@@ -52,6 +52,7 @@ function pickVignette(
 export function FollowedCard() {
   const followed = useWorld((s) => s.followed);
   const unfollow = useWorld((s) => s.unfollowPerson);
+  const answerAddress = useWorld((s) => s.answerFollowedAddress);
   const planetName = useWorld((s) => s.planetName);
   const era = useWorld((s) => s.era);
   const weather = useWorld((s) => s.weather);
@@ -83,7 +84,35 @@ export function FollowedCard() {
 
   if (!followed) return null;
 
-  // Hide the expanded body while a choice card is up to avoid stacking.
+  if (followed.pendingAddress) {
+    return (
+      <div className="pointer-events-auto absolute inset-x-0 bottom-24 z-40 flex justify-center px-4">
+        <div className="terrarium-rise flex w-[min(440px,92vw)] flex-col items-center gap-3 rounded-3xl bg-card/95 p-5 text-center shadow-xl backdrop-blur-xl">
+          <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/45">
+            {followed.name} is speaking to you
+          </p>
+          <p className="font-serif text-lg italic text-foreground/90">
+            "If you are there, send a sign."
+          </p>
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row">
+            <button
+              onClick={() => answerAddress("star")}
+              className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:scale-[1.03]"
+            >
+              send a falling star
+            </button>
+            <button
+              onClick={() => answerAddress("quiet")}
+              className="rounded-full border border-border bg-background/40 px-4 py-2 font-serif text-sm italic text-foreground/70 transition hover:bg-background/80"
+            >
+              stay quiet
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const showBody = expanded && !activeChoiceId;
 
   return (

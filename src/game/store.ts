@@ -43,6 +43,7 @@ interface Actions {
   touchLastSeen: () => void;
   followPerson: (pos: [number, number, number]) => void;
   unfollowPerson: () => void;
+  answerFollowedAddress: (answer: "star" | "quiet") => void;
   reset: () => void;
 }
 
@@ -131,7 +132,21 @@ export const useWorld = create<WorldState & Actions>()(
       setIntro: (intro) => set({ intro }),
       setPlanetName: (planetName) => {
         rememberKeeper(planetName);
-        set({ planetName, intro: "spray", selectedTool: "rain", warmth: 0, water: 0, life: 0 });
+        const s = get();
+        // Naming is the LAST genesis beat. Open the world for real:
+        // pour the first people, set the opening age, fire the creation myth.
+        let patch: Partial<WorldState> = {
+          planetName,
+          intro: "done",
+          selectedTool: null,
+          life: Math.max(s.life, 0.45),
+          weather: "aurora",
+          ageName: ERAS[0].name,
+          era: 0,
+          flags: { ...s.flags, "intro:poured": true },
+        };
+        patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
+        set(patch);
       },
 
       // Legacy intro actions (kept for backward compat; new flow uses tool taps).
@@ -141,7 +156,7 @@ export const useWorld = create<WorldState & Actions>()(
 
       pourPeople: () => {
         const s = get();
-        // Dramatic jump: scatter people across the world.
+        // Legacy: previously a separate jar step. Kept so old saves don't crash.
         set({
           life: Math.max(s.life, 0.45),
           weather: "aurora",
@@ -204,6 +219,17 @@ export const useWorld = create<WorldState & Actions>()(
 
         if (era >= 2 && !s.firedMythIds.includes("creation")) {
           patch = { ...patch, ...addMyth({ ...s, ...patch } as WorldState, "creation") };
+        }
+
+        // Rare direct address from the followed villager. Once, after era 2.
+        if (
+          s.followed &&
+          !s.followed.pendingAddress &&
+          !s.flags["followed:addressed"] &&
+          s.era >= 2 &&
+          Math.random() < 0.004
+        ) {
+          patch.followed = { ...s.followed, pendingAddress: true };
         }
 
         const now = Date.now();
@@ -331,18 +357,18 @@ export const useWorld = create<WorldState & Actions>()(
           patch.weather = "aurora";
         }
 
-        // Intro advancement: only when the right tool is used for the step.
-        if (s.intro === "spray" && tool === "rain") {
-          patch.intro = "warm";
-          patch.selectedTool = "sun";
-        } else if (s.intro === "warm" && tool === "sun") {
+        // Intro advancement: tool flow is warm (sun) → spray (rain) → seed → name.
+        if (s.intro === "warm" && tool === "sun") {
+          patch.intro = "spray";
+          patch.selectedTool = "rain";
+        } else if (s.intro === "spray" && tool === "rain") {
           patch.intro = "seed";
           patch.selectedTool = "seed";
         } else if (s.intro === "seed" && tool === "seed") {
-          // Let them tap a few times — advance once life has visibly grown.
+          // Let them tap a few times. Advance once life has visibly grown.
           const nextLife = patch.life ?? s.life;
           if (nextLife >= 0.18) {
-            patch.intro = "pour";
+            patch.intro = "name";
             patch.selectedTool = null;
           }
         }
@@ -388,31 +414,58 @@ export const useWorld = create<WorldState & Actions>()(
       touchLastSeen: () => set({ lastSeenAt: Date.now() }),
 
       followPerson: (pos) => {
-        const name = randomMythicName();
-        set({ followed: { name, pos, adoptedAt: Date.now() } });
+        const s = get();
+        // The first villager you ever follow is always Asha.
+        const name = s.flags["asha:met"] ? randomMythicName() : "Asha";
+        set({
+          followed: { name, pos, adoptedAt: Date.now() },
+          flags: { ...s.flags, "asha:met": true },
+        });
       },
 
       unfollowPerson: () => set({ followed: null }),
+
+      answerFollowedAddress: (answer) => {
+        const s = get();
+        if (!s.followed) return;
+        const traits = { ...s.traits };
+        const patch: Partial<WorldState> = {
+          followed: { ...s.followed, pendingAddress: false },
+          flags: { ...s.flags, "followed:addressed": true },
+        };
+        if (answer === "star") {
+          traits.faith = clamp(traits.faith + 0.08);
+          patch.traits = traits;
+          patch.weather = "aurora";
+        } else {
+          traits.harmony = clamp(traits.harmony + 0.06);
+          patch.traits = traits;
+        }
+        set(patch);
+      },
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
     {
       name: "terrarium:v1",
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown, _version: number) => {
         const p = (persisted ?? {}) as Partial<WorldState>;
-        // Old intro values are obsolete in the new assembly flow; if a player
-        // wasn't already in the live world, restart the opening cleanly.
-        const validIntros = new Set(["gift", "name", "spray", "warm", "seed", "pour", "done"]);
-        const introOk = p.intro && validIntros.has(p.intro);
+        // Old intro flow had a "pour" jar step that no longer exists.
+        // Lift those players into the live world rather than soft-lock them.
+        let intro = p.intro;
+        if (intro === "pour") intro = "done";
+        const validIntros = new Set(["gift", "warm", "spray", "seed", "name", "done"]);
+        if (!intro || !validIntros.has(intro)) intro = "gift";
         return {
           ...p,
-          intro: introOk ? p.intro : "gift",
+          intro,
           speed: p.speed ?? 1,
           unlockedCuriosityIds: p.unlockedCuriosityIds ?? [],
           playMs: p.playMs ?? 0,
           pivotFired: p.pivotFired ?? false,
           lastSeenAt: p.lastSeenAt ?? null,
+          followed: p.followed ?? null,
         } as WorldState;
       },
       partialize: (s) => ({
