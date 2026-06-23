@@ -42,18 +42,28 @@ export function TerrariumApp() {
     };
   }, [touchLastSeen]);
 
+  const activeChoiceId = useWorld((s) => s.activeChoiceId);
+
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div className="relative h-screen w-screen overflow-hidden bg-background">
       <BackgroundDoodles />
+      {/* soft loading wash so the first frame is never bare teal */}
+      {!mounted && (
+        <div className="absolute inset-0 z-20 grid place-items-center">
+          <p className="terrarium-fade font-serif text-sm italic text-foreground/40">
+            a small world is waking…
+          </p>
+        </div>
+      )}
       {mounted && (
-        <div className="terrarium-canvas-filter absolute inset-0 z-10">
+        <div className="terrarium-canvas-filter terrarium-fade absolute inset-0 z-10">
           <TerrariumScene />
         </div>
       )}
 
 
-      {/* ToolDock + IntroOverlay show throughout the assembly opening too */}
-      {intro !== "gift" && intro !== "name" && <ToolDock />}
+      {/* ToolDock hides while a choice is open so the card never collides with it */}
+      {intro !== "gift" && intro !== "name" && !activeChoiceId && <ToolDock />}
 
       {intro === "done" && (
         <>
