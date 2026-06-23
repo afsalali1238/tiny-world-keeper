@@ -67,44 +67,36 @@ export function Clouds() {
         const angle = t * p.speed;
         const anchor = p.basis.clone().applyAxisAngle(yAxis, angle);
         const off = p.offset.clone().applyAxisAngle(yAxis, angle);
-        const world = anchor.clone().multiplyScalar(1.21).add(off);
-        // re-project to sit on cloud shell
-        world.setLength(1.22 + (anchor.y > 0 ? 0.01 : 0));
+        const world = anchor.clone().multiplyScalar(1.27).add(off);
+        // re-project to sit higher above the surface so clouds read as weather, not debris
+        world.setLength(1.28 + (anchor.y > 0 ? 0.01 : 0));
 
         dummy.position.copy(world);
         dummy.lookAt(0, 0, 0);
         // flatten vertically so puffs read as clouds, not orbs
-        dummy.scale.set(p.scale * 1.3, p.scale * 0.65, p.scale);
+        dummy.scale.set(p.scale * 1.3, p.scale * 0.55, p.scale);
         dummy.updateMatrix();
-
-        outlineDummy.position.copy(world);
-        outlineDummy.lookAt(0, 0, 0);
-        outlineDummy.scale.set(p.scale * 1.3 * 1.08, p.scale * 0.65 * 1.18, p.scale * 1.08);
-        outlineDummy.updateMatrix();
       } else {
         dummy.scale.setScalar(0);
         dummy.updateMatrix();
-        outlineDummy.scale.setScalar(0);
-        outlineDummy.updateMatrix();
       }
       ref.current.setMatrixAt(i, dummy.matrix);
-      outlineRef.current?.setMatrixAt(i, outlineDummy.matrix);
     }
     ref.current.instanceMatrix.needsUpdate = true;
-    if (outlineRef.current) outlineRef.current.instanceMatrix.needsUpdate = true;
   });
 
-  const tint = weather === "rain" || weather === "storm" ? "#cfd6da" : "#fafafa";
+  const tint = weather === "rain" || weather === "storm" ? "#dbe2e6" : "#ffffff";
 
   return (
     <group>
-      <instancedMesh ref={outlineRef} args={[undefined, undefined, COUNT]} frustumCulled={false}>
-        <icosahedronGeometry args={[1, 2]} />
-        <meshBasicMaterial color={INK} side={THREE.BackSide} />
-      </instancedMesh>
       <instancedMesh ref={ref} args={[undefined, undefined, COUNT]} frustumCulled={false}>
         <icosahedronGeometry args={[1, 2]} />
-        <meshToonMaterial gradientMap={gradient} color={tint} />
+        <meshBasicMaterial
+          color={tint}
+          transparent
+          opacity={weather === "rain" || weather === "storm" ? 0.78 : 0.62}
+          depthWrite={false}
+        />
       </instancedMesh>
     </group>
   );
