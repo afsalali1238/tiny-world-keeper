@@ -66,11 +66,11 @@ interface Actions {
   reset: () => void;
 }
 
-const initialWorld: WorldState = {
+const createInitialWorld = (): WorldState => ({
   planetName: "",
   seed: Math.floor(Math.random() * 100000),
   era: 0,
-  ageName: ERAS[0].name,
+  ageName: "",
   warmth: 0,
   water: 0,
   life: 0,
@@ -101,7 +101,52 @@ const initialWorld: WorldState = {
   offlineGapMs: null,
   recentCombo: null,
   followed: null,
-};
+});
+
+const initialWorld = createInitialWorld();
+
+const VALID_INTROS = new Set<WorldState["intro"]>(["gift", "warm", "spray", "seed", "name", "done"]);
+
+function hasName(name: string | undefined) {
+  return !!name && name.trim() !== "";
+}
+
+function shouldForceColdGenesis(state: Partial<WorldState>) {
+  const unnamed = !hasName(state.planetName);
+  const noProgress =
+    (state.ticks ?? 0) === 0 &&
+    (state.era ?? 0) === 0 &&
+    (state.life ?? 0) === 0 &&
+    (state.warmth ?? 0) === 0 &&
+    (state.water ?? 0) === 0 &&
+    (!state.myths || state.myths.length === 0) &&
+    (!state.firedMythIds || state.firedMythIds.length === 0);
+
+  // The old/new-game bug produced an unnamed world that was already in a late
+  // era with the creation myth written. Treat every unnamed "advanced" save as
+  // a corrupt fresh start so first-time players always live Genesis.
+  const unnamedAdvancedSeed =
+    unnamed &&
+    ((state.intro === "done") ||
+      (state.ticks ?? 0) > 0 ||
+      (state.era ?? 0) > 0 ||
+      (state.life ?? 0) > 0 ||
+      (state.warmth ?? 0) > 0 ||
+      (state.water ?? 0) > 0 ||
+      !!state.weather ||
+      !!state.flags && Object.keys(state.flags).length > 0 ||
+      !!state.myths && state.myths.length > 0 ||
+      !!state.firedMythIds && state.firedMythIds.length > 0);
+
+  return unnamed && (noProgress || unnamedAdvancedSeed);
+}
+
+function coldGenesisPatch(seed = Math.floor(Math.random() * 100000)): Partial<WorldState> {
+  return {
+    ...createInitialWorld(),
+    seed,
+  };
+}
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
@@ -476,7 +521,7 @@ export const useWorld = create<WorldState & Actions>()(
         } catch {
           // fall through to in-memory reset
         }
-        set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) });
+        set(coldGenesisPatch());
       },
     }),
     {
@@ -484,20 +529,14 @@ export const useWorld = create<WorldState & Actions>()(
       version: 4,
       migrate: (persisted: unknown, _version: number) => {
         const p = (persisted ?? {}) as Partial<WorldState>;
+        if (shouldForceColdGenesis(p)) {
+          return coldGenesisPatch(p.seed) as WorldState;
+        }
         let intro = p.intro;
         // Legacy "pour" was a removed jar step. Send those saves to the naming
         // beat so they still get the final genesis moment, not straight to done.
         if (intro === "pour") intro = "name";
-        const validIntros = new Set(["gift", "warm", "spray", "seed", "name", "done"]);
-        if (!intro || !validIntros.has(intro)) intro = "gift";
-        // GUARD: if the persisted save has no real progress (no name, no ticks,
-        // no myths) then it's effectively a fresh player. Force them to genesis
-        // no matter what `intro` claimed — this is the brand-new-player bug.
-        const looksEmpty =
-          (!p.planetName || p.planetName.trim() === "") &&
-          (p.ticks ?? 0) === 0 &&
-          (!p.myths || p.myths.length === 0);
-        if (looksEmpty) intro = "gift";
+        if (!intro || !VALID_INTROS.has(intro)) intro = "gift";
         return {
           ...p,
           intro,
@@ -536,26 +575,13 @@ export const useWorld = create<WorldState & Actions>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
+        if (shouldForceColdGenesis(state)) {
+          const cold = coldGenesisPatch(state.seed);
+          Object.assign(state, cold, { session: (state.session ?? 0) + 1 });
+          return;
+        }
         state.session = (state.session ?? 0) + 1;
         state.activeChoiceId = null;
-        // Same guard as migrate: any save with no real progress is treated as
-        // a fresh player and routed to the gift beat. Belt and braces — migrate
-        // only fires on version bumps, this fires every load.
-        const looksEmpty =
-          (!state.planetName || state.planetName.trim() === "") &&
-          (state.ticks ?? 0) === 0 &&
-          (!state.myths || state.myths.length === 0);
-        if (looksEmpty) {
-          state.intro = "gift";
-          state.era = 0;
-          state.ageName = ERAS[0].name;
-          state.firedMythIds = [];
-          state.myths = [];
-          state.life = 0;
-          state.warmth = 0;
-          state.water = 0;
-          state.weather = null;
-        }
         // Compute offline gap if we have a prior visit and the world is alive.
         const last = state.lastSeenAt;
         if (last && state.intro === "done") {
