@@ -403,11 +403,35 @@ export const useWorld = create<WorldState & Actions>()(
       touchLastSeen: () => set({ lastSeenAt: Date.now() }),
 
       followPerson: (pos) => {
-        const name = randomMythicName();
-        set({ followed: { name, pos, adoptedAt: Date.now() } });
+        const s = get();
+        // The first villager you ever follow is always Asha.
+        const name = s.flags["asha:met"] ? randomMythicName() : "Asha";
+        set({
+          followed: { name, pos, adoptedAt: Date.now() },
+          flags: { ...s.flags, "asha:met": true },
+        });
       },
 
       unfollowPerson: () => set({ followed: null }),
+
+      answerFollowedAddress: (answer) => {
+        const s = get();
+        if (!s.followed) return;
+        const traits = { ...s.traits };
+        const patch: Partial<WorldState> = {
+          followed: { ...s.followed, pendingAddress: false },
+          flags: { ...s.flags, "followed:addressed": true },
+        };
+        if (answer === "star") {
+          traits.faith = clamp(traits.faith + 0.08);
+          patch.traits = traits;
+          patch.weather = "aurora";
+        } else {
+          traits.harmony = clamp(traits.harmony + 0.06);
+          patch.traits = traits;
+        }
+        set(patch);
+      },
 
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
