@@ -86,7 +86,10 @@ export function FollowedCard() {
 
   if (followed.pendingAddress) {
     return (
-      <div className="pointer-events-auto absolute inset-x-0 bottom-24 z-40 flex justify-center px-4">
+      <div
+        className="pointer-events-auto absolute inset-x-0 z-40 flex justify-center px-4 safe-offset-bottom safe-x"
+        style={{ ["--safe-bottom-base" as string]: "6rem" }}
+      >
         <div className="terrarium-rise flex w-[min(440px,92vw)] flex-col items-center gap-3 rounded-3xl bg-card/95 p-5 text-center shadow-xl backdrop-blur-xl">
           <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/45">
             {followed.name} is speaking to you
