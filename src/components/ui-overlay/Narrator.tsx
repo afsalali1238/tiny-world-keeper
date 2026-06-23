@@ -281,15 +281,16 @@ export function Narrator() {
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 z-20 flex justify-center px-6 safe-offset-bottom safe-x"
+      className="pointer-events-none absolute inset-x-0 z-20 flex justify-center px-6 md:pr-[22rem] md:pl-10 safe-offset-bottom safe-x"
       style={{ ["--safe-bottom-base" as string]: "7rem" }}
     >
       <p
         key={visible.id}
-        className="terrarium-narrate max-w-2xl text-center font-serif text-base italic leading-relaxed text-cream md:text-lg"
+        className="terrarium-narrate w-full max-w-sm text-center font-serif text-sm italic leading-relaxed text-cream sm:max-w-md sm:text-base md:max-w-lg md:text-lg"
         style={{
           textShadow: "0 1px 2px rgba(0,0,0,0.25), 0 0 24px rgba(0,0,0,0.18)",
           animationDuration: `${holdMs}ms`,
+          overflowWrap: "break-word",
         }}
       >
         {visible.text}
@@ -297,3 +298,4 @@ export function Narrator() {
     </div>
   );
 }
+
