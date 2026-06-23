@@ -43,6 +43,7 @@ interface Actions {
   touchLastSeen: () => void;
   followPerson: (pos: [number, number, number]) => void;
   unfollowPerson: () => void;
+  answerFollowedAddress: (answer: "star" | "quiet") => void;
   reset: () => void;
 }
 
