@@ -66,11 +66,11 @@ interface Actions {
   reset: () => void;
 }
 
-const initialWorld: WorldState = {
+const createInitialWorld = (): WorldState => ({
   planetName: "",
   seed: Math.floor(Math.random() * 100000),
   era: 0,
-  ageName: ERAS[0].name,
+  ageName: "",
   warmth: 0,
   water: 0,
   life: 0,
@@ -101,7 +101,52 @@ const initialWorld: WorldState = {
   offlineGapMs: null,
   recentCombo: null,
   followed: null,
-};
+});
+
+const initialWorld = createInitialWorld();
+
+const VALID_INTROS = new Set<WorldState["intro"]>(["gift", "warm", "spray", "seed", "name", "done"]);
+
+function hasName(name: string | undefined) {
+  return !!name && name.trim() !== "";
+}
+
+function shouldForceColdGenesis(state: Partial<WorldState>) {
+  const unnamed = !hasName(state.planetName);
+  const noProgress =
+    (state.ticks ?? 0) === 0 &&
+    (state.era ?? 0) === 0 &&
+    (state.life ?? 0) === 0 &&
+    (state.warmth ?? 0) === 0 &&
+    (state.water ?? 0) === 0 &&
+    (!state.myths || state.myths.length === 0) &&
+    (!state.firedMythIds || state.firedMythIds.length === 0);
+
+  // The old/new-game bug produced an unnamed world that was already in a late
+  // era with the creation myth written. Treat every unnamed "advanced" save as
+  // a corrupt fresh start so first-time players always live Genesis.
+  const unnamedAdvancedSeed =
+    unnamed &&
+    ((state.intro === "done") ||
+      (state.ticks ?? 0) > 0 ||
+      (state.era ?? 0) > 0 ||
+      (state.life ?? 0) > 0 ||
+      (state.warmth ?? 0) > 0 ||
+      (state.water ?? 0) > 0 ||
+      !!state.weather ||
+      !!state.flags && Object.keys(state.flags).length > 0 ||
+      !!state.myths && state.myths.length > 0 ||
+      !!state.firedMythIds && state.firedMythIds.length > 0);
+
+  return unnamed && (noProgress || unnamedAdvancedSeed);
+}
+
+function coldGenesisPatch(seed = Math.floor(Math.random() * 100000)): Partial<WorldState> {
+  return {
+    ...createInitialWorld(),
+    seed,
+  };
+}
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 
