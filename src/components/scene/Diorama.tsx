@@ -108,7 +108,7 @@ export function Diorama({ geom }: Props) {
     });
   }, [houses]);
 
-  useFrame(() => {
+  useFrame((state) => {
     const life = lifeRef.current;
     const houseCount = Math.min(houses.length, Math.floor(life * houses.length * 1.6));
     const treeCount = Math.min(trees.length, Math.floor(life * trees.length * 1.8));
