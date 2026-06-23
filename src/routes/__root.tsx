@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "The Terrarium" },
       { name: "description", content: "A quiet god-game diorama. Tend a tiny living world with rain, sun, wind, and seed — and see what stories the people inside invent about you." },
       { name: "author", content: "Terrarium" },
