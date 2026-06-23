@@ -44,7 +44,10 @@ export function MenuCorner({ onHelp }: { onHelp?: () => void } = {}) {
     }
   };
   return (
-    <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
+    <div
+      className="absolute right-5 z-20 flex items-center gap-2 safe-offset-top safe-right"
+      style={{ ["--safe-top-base" as string]: "1.25rem" }}
+    >
       <button
         title="Begin a new world"
         onClick={onReset}
