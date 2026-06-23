@@ -14,9 +14,9 @@ export function SunLight() {
     ref.current.position.set(Math.cos(t * speed) * 5, 1.6, Math.sin(t * speed) * 5);
   });
 
-  const intensity = intro === "gift" ? 0.5 : 1.7;
-  // Low ambient creates a real terminator line so the night side reads as night.
-  const ambient = intro === "gift" ? 0.35 : 0.16;
+  // Brighter gift state so the cold rock reads clearly on first paint.
+  const intensity = intro === "gift" ? 1.15 : 1.7;
+  const ambient = intro === "gift" ? 0.55 : 0.16;
   return (
     <>
       <ambientLight intensity={ambient} color="#9fb8c8" />
