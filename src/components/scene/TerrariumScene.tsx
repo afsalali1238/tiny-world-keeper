@@ -65,7 +65,7 @@ export function TerrariumScene() {
         {intro === "done" && <Aurora />}
         {showSurface && <TouchEffects />}
 
-        <ContactShadows position={[0, -1.2, 0]} opacity={0.25} scale={4} blur={2.6} far={2} />
+        {/* contact shadow removed — was reading as a grey placeholder disc under the planet */}
         <OrbitControls
           enablePan={false}
           enableZoom={true}
