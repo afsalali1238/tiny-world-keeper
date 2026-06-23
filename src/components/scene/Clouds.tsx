@@ -37,7 +37,7 @@ export function Clouds() {
       const up = Math.abs(basis.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
       const tX = new THREE.Vector3().crossVectors(up, basis).normalize();
       const tY = new THREE.Vector3().crossVectors(basis, tX).normalize();
-      const baseScale = 0.16 + Math.random() * 0.07;
+      const baseScale = 0.11 + Math.random() * 0.05;
       const speed = 0.035 + Math.random() * 0.03;
       for (let p = 0; p < PUFFS_PER_CLOUD; p++) {
         // 3 puffs in a small clump: center + two flankers
