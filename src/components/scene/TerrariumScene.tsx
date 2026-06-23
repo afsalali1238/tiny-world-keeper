@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+
 import * as THREE from "three";
 import { Planet } from "./Planet";
 import { TouchEffects } from "./TouchEffects";
@@ -52,12 +53,23 @@ export function TerrariumScene() {
   const cold = intro === "gift" || intro === "warm";
   const showClouds = intro === "seed" || intro === "name" || intro === "done";
   const showSurface = intro !== "gift" && intro !== "name";
-  const isNarrow = typeof window !== "undefined" && window.innerWidth < 720;
-  // The planet has radius ~1. At fov 32° we need ~3.6 units to leave a comfortable
-  // halo. On narrow screens we widen fov AND pull further back so the whole
-  // little world floats with space around it instead of clipping the edges.
-  const camZ = isNarrow ? 5.6 : 3.6;
-  const fov = isNarrow ? 38 : 32;
+  const [vw, setVw] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
+  useEffect(() => {
+    const on = () => setVw(window.innerWidth);
+    window.addEventListener("resize", on);
+    window.addEventListener("orientationchange", on);
+    return () => {
+      window.removeEventListener("resize", on);
+      window.removeEventListener("orientationchange", on);
+    };
+  }, []);
+  // Tiered framing so the planet always floats with breathing room.
+  // Small phones need a much wider FOV + further pullback than tablets.
+  const isPhone = vw < 480;
+  const isNarrow = vw < 820;
+  const camZ = isPhone ? 7.2 : isNarrow ? 5.6 : 3.6;
+  const fov = isPhone ? 46 : isNarrow ? 38 : 32;
+
   return (
     <Canvas
       shadows
@@ -77,8 +89,9 @@ export function TerrariumScene() {
         <OrbitControls
           enablePan={false}
           enableZoom={true}
-          minDistance={isNarrow ? 3.0 : 2.2}
-          maxDistance={isNarrow ? 7.5 : 5.5}
+          minDistance={isPhone ? 4.0 : isNarrow ? 3.0 : 2.2}
+          maxDistance={isPhone ? 9.0 : isNarrow ? 7.5 : 5.5}
+
           zoomSpeed={0.6}
           enableDamping
           dampingFactor={0.08}
