@@ -119,7 +119,10 @@ export function FollowedCard() {
   const showBody = expanded && !activeChoiceId;
 
   return (
-    <div className="pointer-events-auto absolute left-4 top-28 z-30 max-w-[min(18rem,70vw)]">
+    <div
+      className="pointer-events-auto absolute left-4 z-30 max-w-[min(18rem,70vw)] safe-offset-top safe-left"
+      style={{ ["--safe-top-base" as string]: "7rem" }}
+    >
       <button
         onClick={() => setExpanded((v) => !v)}
         className="flex items-center gap-2 rounded-full bg-card/85 px-3 py-1.5 shadow-sm backdrop-blur-md transition hover:bg-card/95"
