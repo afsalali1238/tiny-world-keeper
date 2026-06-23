@@ -404,18 +404,32 @@ export function Diorama({ geom }: Props) {
         <meshToonMaterial {...toonProps} color="#8d8e8a" />
       </instancedMesh>
 
-      {/* NIGHT LIGHTS — additive emissive blobs that glow on the dark side */}
-      <instancedMesh ref={lightsRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false}>
-        <sphereGeometry args={[0.5, 8, 8]} />
+      {/* NIGHT LIGHTS — soft halo + bright core, additive so they read across the terminator */}
+      <instancedMesh ref={lightHaloRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false} renderOrder={5}>
+        <sphereGeometry args={[0.5, 10, 10]} />
         <meshBasicMaterial
-          color="#ffd084"
+          color="#ffb84a"
           transparent
-          opacity={0.95}
+          opacity={0.28}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
+          depthTest={false}
           toneMapped={false}
         />
       </instancedMesh>
+      <instancedMesh ref={lightsRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false} renderOrder={6}>
+        <sphereGeometry args={[0.5, 10, 10]} />
+        <meshBasicMaterial
+          color="#fff1c2"
+          transparent
+          opacity={1}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          depthTest={false}
+          toneMapped={false}
+        />
+      </instancedMesh>
+
     </group>
   );
 }
