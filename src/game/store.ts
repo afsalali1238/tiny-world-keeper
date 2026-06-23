@@ -386,6 +386,13 @@ export const useWorld = create<WorldState & Actions>()(
 
       touchLastSeen: () => set({ lastSeenAt: Date.now() }),
 
+      followPerson: (pos) => {
+        const name = randomMythicName();
+        set({ followed: { name, pos, adoptedAt: Date.now() } });
+      },
+
+      unfollowPerson: () => set({ followed: null }),
+
       reset: () => set({ ...initialWorld, seed: Math.floor(Math.random() * 100000) }),
     }),
     {
