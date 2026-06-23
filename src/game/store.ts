@@ -345,18 +345,18 @@ export const useWorld = create<WorldState & Actions>()(
           patch.weather = "aurora";
         }
 
-        // Intro advancement: only when the right tool is used for the step.
-        if (s.intro === "spray" && tool === "rain") {
-          patch.intro = "warm";
-          patch.selectedTool = "sun";
-        } else if (s.intro === "warm" && tool === "sun") {
+        // Intro advancement: tool flow is warm (sun) → spray (rain) → seed → name.
+        if (s.intro === "warm" && tool === "sun") {
+          patch.intro = "spray";
+          patch.selectedTool = "rain";
+        } else if (s.intro === "spray" && tool === "rain") {
           patch.intro = "seed";
           patch.selectedTool = "seed";
         } else if (s.intro === "seed" && tool === "seed") {
-          // Let them tap a few times — advance once life has visibly grown.
+          // Let them tap a few times. Advance once life has visibly grown.
           const nextLife = patch.life ?? s.life;
           if (nextLife >= 0.18) {
-            patch.intro = "pour";
+            patch.intro = "name";
             patch.selectedTool = null;
           }
         }
