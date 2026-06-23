@@ -56,7 +56,12 @@ export interface WorldState {
   // Consequence pack
   recentCombo: { kind: "steam" | "bloom" | "drought" | "exodus"; ts: number } | null;
   // Followed person (a single villager you've adopted)
-  followed: { name: string; pos: [number, number, number]; adoptedAt: number } | null;
+  followed: {
+    name: string;
+    pos: [number, number, number];
+    adoptedAt: number;
+    pendingAddress?: boolean;
+  } | null;
 }
 
 export interface MythEntry {
