@@ -509,13 +509,18 @@ export const useWorld = create<WorldState & Actions>()(
       },
 
       reset: () => {
-        // Hard reset: wipe persisted state and reload so the renderer comes up
-        // fresh in `intro: "gift"` with no stale R3F objects, choice cards, or
-        // ambient audio holding the main thread.
+        // Hard reset: navigate to ?fresh=1 so the pre-hydrate wipe runs and
+        // the renderer comes up clean. We use location.replace (not reload)
+        // so pending fetches / AudioContexts / R3F render loops don't have
+        // to gracefully tear down on the current page — the navigation just
+        // discards them. This avoids the ~45s reload hang we saw before.
         try {
           if (typeof window !== "undefined") {
+            // Best-effort: silence audio so the new page boots quiet.
+            try { (window as unknown as { __terrariumAudio?: { suspend?: () => void } }).__terrariumAudio?.suspend?.(); } catch { /* noop */ }
             window.localStorage.removeItem("terrarium:v1");
-            window.location.reload();
+            const url = window.location.pathname + "?fresh=1" + window.location.hash;
+            window.location.replace(url);
             return;
           }
         } catch {
@@ -523,6 +528,7 @@ export const useWorld = create<WorldState & Actions>()(
         }
         set(coldGenesisPatch());
       },
+
     }),
     {
       name: "terrarium:v1",
