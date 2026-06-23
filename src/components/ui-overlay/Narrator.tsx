@@ -254,10 +254,12 @@ export function Narrator() {
       unsub();
       clearInterval(idleTimer);
       clearTimeout(fifthTimer);
+      if (fifthInterval) clearInterval(fifthInterval);
       clearTimeout(introTimer);
       clearInterval(pivotTimer);
       clearInterval(whisperTimer);
     };
+
   }, [intro]);
 
   // Auto-clear the subtitle when its reading time elapses.
