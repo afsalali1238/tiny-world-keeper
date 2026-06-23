@@ -281,23 +281,31 @@ export function Diorama({ geom }: Props) {
       );
     }
 
-    // night lights — one per house, only on night side. Bigger + a halo so they read at distance.
+    // night lights — one per house, only on night side. We render two layers:
+    // a bright core and a soft additive halo, so each settlement reads as a
+    // glowing dot at distance even on small screens.
     // Sun direction matches SunLight.tsx so the terminator lines up with actual lighting.
     const t = state.clock.elapsedTime;
-    const sunSpeed = useWorld.getState().intro === "done" ? 0.06 : 0.02;
+    const sunSpeed = useWorld.getState().intro === "done" ? 0.09 : 0.02;
     const lightDir = new THREE.Vector3(
       Math.cos(t * sunSpeed) * 5,
       1.6,
       Math.sin(t * sunSpeed) * 5,
     ).normalize();
     const parentRot = (lightsRef.current?.parent?.parent?.rotation as THREE.Euler) ?? new THREE.Euler();
+    // Subtle flicker so the lights feel lived-in.
+    const flicker = 0.92 + Math.sin(t * 3.1) * 0.04 + Math.sin(t * 7.7) * 0.04;
     houses.forEach((s, i) => {
       if (i >= LIGHT_CAP) return;
       const worldPos = s.sample.position.clone().applyEuler(parentRot);
       const facing = worldPos.normalize().dot(lightDir);
-      const isNight = facing < 0.05 && i < houseCount;
-      const sc = isNight
-        ? new THREE.Vector3(s.scale * 1.1, s.scale * 1.1, s.scale * 1.1)
+      // smooth fade across the terminator instead of a hard cutoff
+      const nightAmt = THREE.MathUtils.clamp((0.1 - facing) * 4, 0, 1);
+      const visible = i < houseCount && nightAmt > 0.01;
+      const coreScale = s.scale * 2.6 * nightAmt * flicker;
+      const haloScale = s.scale * 6.5 * nightAmt;
+      const sc = visible
+        ? new THREE.Vector3(coreScale, coreScale, coreScale)
         : new THREE.Vector3(0, 0, 0);
       writeAlignedMatrix(
         lightsRef.current,
@@ -307,9 +315,24 @@ export function Diorama({ geom }: Props) {
         sc,
         s.scale * 0.85,
         s.yaw,
-        isNight,
+        visible,
+      );
+      // halo
+      const haloSc = visible
+        ? new THREE.Vector3(haloScale, haloScale, haloScale)
+        : new THREE.Vector3(0, 0, 0);
+      writeAlignedMatrix(
+        lightHaloRef.current,
+        null,
+        i,
+        s.sample,
+        haloSc,
+        s.scale * 0.85,
+        s.yaw,
+        visible,
       );
     });
+
 
     // mark needsUpdate
     [
