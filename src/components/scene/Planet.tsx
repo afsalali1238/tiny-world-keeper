@@ -114,6 +114,15 @@ export function Planet({ cold = false }: Props) {
     }
   };
 
+  // Cursor affordance: pointer when the surface is tappable (tool or follow).
+  const handlePointerOver = () => {
+    if (intro === "gift" || intro === "name") return;
+    if (typeof document !== "undefined") document.body.style.cursor = "pointer";
+  };
+  const handlePointerOut = () => {
+    if (typeof document !== "undefined") document.body.style.cursor = "";
+  };
+
   return (
     <group ref={groupRef}>
       {/* outline (inverted hull) */}
@@ -128,9 +137,12 @@ export function Planet({ cold = false }: Props) {
         castShadow
         receiveShadow
         onPointerDown={handlePlanetDown}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
       >
         <meshToonMaterial vertexColors gradientMap={gradient} />
       </mesh>
+
 
       {showAtmo && (
         <mesh scale={1.08}>
