@@ -31,6 +31,15 @@ export function LivingPulse() {
 export function MenuCorner({ onHelp }: { onHelp?: () => void } = {}) {
   const audioOn = useWorld((s) => s.audioOn);
   const setAudio = useWorld((s) => s.setAudio);
+  const reset = useWorld((s) => s.reset);
+  const onReset = () => {
+    if (
+      typeof window !== "undefined" &&
+      window.confirm("Begin a new world? This world and its keeper will be lost.")
+    ) {
+      reset();
+    }
+  };
   return (
     <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
       {onHelp && (
