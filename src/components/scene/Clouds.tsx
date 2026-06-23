@@ -5,7 +5,7 @@ import { useWorld } from "@/game/store";
 import { getToonGradient, INK } from "@/game/toon-gradient";
 
 // Each "cloud" is 3 overlapping puffs. CLOUDS controls how many clouds exist.
-const CLOUDS = 14;
+const CLOUDS = 9;
 const PUFFS_PER_CLOUD = 3;
 const COUNT = CLOUDS * PUFFS_PER_CLOUD;
 
