@@ -74,28 +74,14 @@ export function TerrariumScene() {
   const cold = intro === "gift" || intro === "warm";
   const showClouds = intro === "seed" || intro === "name" || intro === "done";
   const showSurface = intro !== "gift" && intro !== "name";
-  const [vw, setVw] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1024));
-  useEffect(() => {
-    const on = () => setVw(window.innerWidth);
-    window.addEventListener("resize", on);
-    window.addEventListener("orientationchange", on);
-    return () => {
-      window.removeEventListener("resize", on);
-      window.removeEventListener("orientationchange", on);
-    };
-  }, []);
-  // Tiered framing so the planet always floats with breathing room.
-  // Small phones need a much wider FOV + further pullback than tablets.
-  const isPhone = vw < 480;
-  const isNarrow = vw < 820;
-  const camZ = isPhone ? 7.2 : isNarrow ? 5.6 : 3.6;
-  const fov = isPhone ? 46 : isNarrow ? 38 : 32;
-
+  // A modest fixed fov reads as "tiny world in a bottle" rather than fisheye.
+  // FitCamera then chooses the distance so the planet always leaves halo room.
+  const fov = 34;
   return (
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.2, camZ], fov }}
+      camera={{ position: [0, 0.2, 5], fov }}
       gl={{ antialias: true }}
     >
       <SceneBackground />
@@ -106,21 +92,20 @@ export function TerrariumScene() {
         {intro === "done" && <Aurora />}
         {showSurface && <TouchEffects />}
 
-        {/* contact shadow removed — was reading as a grey placeholder disc under the planet */}
         <OrbitControls
           enablePan={false}
           enableZoom={true}
-          minDistance={isPhone ? 4.0 : isNarrow ? 3.0 : 2.2}
-          maxDistance={isPhone ? 9.0 : isNarrow ? 7.5 : 5.5}
-
+          minDistance={2.4}
+          maxDistance={12}
           zoomSpeed={0.6}
           enableDamping
           dampingFactor={0.08}
           rotateSpeed={0.6}
         />
         <TickDriver />
-        <GlassCamera />
+        <FitCamera />
       </Suspense>
     </Canvas>
   );
 }
+
