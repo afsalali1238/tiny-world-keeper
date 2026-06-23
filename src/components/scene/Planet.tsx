@@ -38,7 +38,7 @@ export function Planet({ cold = false }: Props) {
   useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
     if (groupRef.current) {
-      groupRef.current.rotation.y += dt * 0.04;
+      groupRef.current.rotation.y += dt * 0.06;
       const breathe = 1 + Math.sin(t * 0.7) * 0.006;
       // Render glitch: ~once every 3-6 minutes, scale.x desyncs by 0.04 for 180ms.
       // The world is rendered, and the rendering is fallible.
