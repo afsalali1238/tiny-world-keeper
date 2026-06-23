@@ -36,8 +36,6 @@ export function CuriosityPanel() {
   const tier1 = CURIOSITIES.filter((c) => (c.tier ?? 1) === 1);
   const tier2 = CURIOSITIES.filter((c) => c.tier === 2);
   const tier1Complete = tier1.every((c) => unlockedSet.has(c.id));
-  const count = unlocked.length;
-  const total = tier1Complete ? CURIOSITIES.length : tier1.length;
   const hasUnseen = !!useWorld((s) => s.lastUnlockedCuriosity);
 
 
@@ -46,10 +44,13 @@ export function CuriosityPanel() {
       <button
         onClick={() => setOpen(true)}
         title="curiosities"
-        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/80 px-3 py-1.5 backdrop-blur shadow-sm font-serif text-xs italic text-foreground/70 hover:bg-card"
+        aria-label="curiosities"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-grid h-9 w-9 place-items-center rounded-full bg-card/80 backdrop-blur shadow-sm hover:bg-card"
       >
-        <span>✦ {count} / {total}</span>
-        {hasUnseen && <span className="terrarium-pulse h-1.5 w-1.5 rounded-full bg-accent" />}
+        <span className="font-serif text-base italic text-foreground/70">✦</span>
+        {hasUnseen && (
+          <span className="terrarium-pulse absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" />
+        )}
       </button>
 
 
