@@ -1,10 +1,10 @@
 import { useWorld } from "@/game/store";
 import type { Speed } from "@/game/types";
 
-const OPTIONS: { value: Speed; label: string }[] = [
-  { value: 0.5, label: "½×" },
-  { value: 1, label: "1×" },
-  { value: 4, label: "4×" },
+const OPTIONS: { value: Speed; label: string; icon: string }[] = [
+  { value: 0.5, label: "slow", icon: "◐" },
+  { value: 1, label: "steady", icon: "●" },
+  { value: 4, label: "swift", icon: "⟫" },
 ];
 
 export function SpeedDial() {
@@ -20,15 +20,16 @@ export function SpeedDial() {
           <button
             key={o.value}
             onClick={() => setSpeed(o.value)}
-            title={`time flows at ${o.label}`}
+            title={o.label}
+            aria-label={`time flows ${o.label}`}
             className={
-              "h-7 w-9 rounded-full font-serif text-xs italic transition " +
+              "grid h-7 w-9 place-items-center rounded-full font-serif text-sm transition " +
               (on
                 ? "bg-accent text-accent-foreground shadow"
                 : "text-foreground/55 hover:bg-secondary/70")
             }
           >
-            {o.label}
+            {o.icon}
           </button>
         );
       })}
