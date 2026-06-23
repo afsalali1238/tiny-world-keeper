@@ -13,7 +13,10 @@ export function SpeedDial() {
   const setSpeed = useWorld((s) => s.setSpeed);
   if (intro !== "done") return null;
   return (
-    <div className="pointer-events-auto absolute right-5 top-20 z-20 flex flex-col items-stretch gap-1 rounded-full bg-card/80 p-1 backdrop-blur shadow-sm">
+    <div
+      className="pointer-events-auto absolute right-5 z-20 flex flex-col items-stretch gap-1 rounded-full bg-card/80 p-1 backdrop-blur shadow-sm safe-offset-top safe-right"
+      style={{ ["--safe-top-base" as string]: "5rem" }}
+    >
       {OPTIONS.map((o) => {
         const on = speed === o.value;
         return (
