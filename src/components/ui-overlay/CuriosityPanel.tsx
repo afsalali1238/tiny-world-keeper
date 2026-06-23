@@ -14,7 +14,7 @@ export function CuriosityToast() {
   const c = CURIOSITY_BY_ID[last.id];
   if (!c) return null;
   return (
-    <div className="pointer-events-none absolute top-24 right-3 z-30 max-w-[16rem] sm:max-w-[18rem] sm:right-5 md:bottom-28 md:right-6 md:top-auto">
+    <div className="pointer-events-none absolute right-3 z-30 max-w-[16rem] sm:max-w-[18rem] sm:right-5 md:bottom-28 md:right-6 md:top-auto safe-offset-top safe-right md:[--safe-top-base:auto] [--safe-top-base:6rem]">
       <div className="terrarium-rise rounded-2xl bg-card/90 px-4 py-3 backdrop-blur shadow-sm">
         <p className="font-serif text-[10px] uppercase tracking-[0.28em] text-foreground/45">
           ✦  a curiosity recorded
@@ -45,7 +45,8 @@ export function CuriosityPanel() {
         onClick={() => setOpen(true)}
         title="curiosities"
         aria-label="curiosities"
-        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-grid h-9 w-9 place-items-center rounded-full bg-card/80 backdrop-blur shadow-sm hover:bg-card"
+        className="pointer-events-auto absolute left-5 bottom-5 z-20 inline-grid h-9 w-9 place-items-center rounded-full bg-card/80 backdrop-blur shadow-sm hover:bg-card safe-offset-bottom safe-left"
+        style={{ ["--safe-bottom-base" as string]: "1.25rem" }}
       >
         <span className="font-serif text-base italic text-foreground/70">✦</span>
         {hasUnseen && (

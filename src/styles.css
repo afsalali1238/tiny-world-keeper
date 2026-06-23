@@ -139,5 +139,16 @@
 }
 
 
+/* Safe-area utility classes so HUD chrome clears notches, dynamic islands,
+   and the browser/home-bar overlays on mobile. */
+.safe-top    { padding-top:    max(env(safe-area-inset-top), 0px); }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
+.safe-left   { padding-left:   max(env(safe-area-inset-left), 0px); }
+.safe-right  { padding-right:  max(env(safe-area-inset-right), 0px); }
+.safe-x      { padding-left:   max(env(safe-area-inset-left), 0px);
+               padding-right:  max(env(safe-area-inset-right), 0px); }
 
+/* Offset utilities — add the inset to an existing top/bottom/left/right value. */
+.safe-offset-top    { top:    calc(var(--safe-top-base, 0px)    + env(safe-area-inset-top)); }
+.safe-offset-bottom { bottom: calc(var(--safe-bottom-base, 0px) + env(safe-area-inset-bottom)); }
 

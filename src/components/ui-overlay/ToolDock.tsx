@@ -55,7 +55,10 @@ export function ToolDock() {
   const active = TOOLS.find((t) => t.kind === selectedTool);
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex flex-col items-center gap-2">
+    <div
+      className="pointer-events-none absolute inset-x-0 z-30 flex flex-col items-center gap-2 safe-offset-bottom safe-x"
+      style={{ ["--safe-bottom-base" as string]: "1rem" }}
+    >
       <p className="font-serif text-xs italic text-foreground/55 min-h-[1em]">
         {active ? active.hint : "pick up a tool, then touch the world"}
       </p>

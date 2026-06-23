@@ -4,7 +4,7 @@ export function EraRibbon() {
   const ageName = useWorld((s) => s.ageName);
   const planetName = useWorld((s) => s.planetName);
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-3 px-3">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-3 px-3 safe-top safe-x">
       <div className="flex max-w-[88vw] flex-col items-center rounded-full bg-card/85 px-5 py-2 text-center shadow-md backdrop-blur-md">
         <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/55 truncate max-w-full">
           {planetName}
@@ -21,7 +21,10 @@ export function LivingPulse() {
   const life = useWorld((s) => s.life);
   const label = lifeLabel(life);
   return (
-    <div className="pointer-events-none absolute left-5 top-16 z-20 flex items-center gap-2.5">
+    <div
+      className="pointer-events-none absolute left-5 z-20 flex items-center gap-2.5 safe-offset-top safe-left"
+      style={{ ["--safe-top-base" as string]: "4rem" }}
+    >
       <span className="terrarium-pulse h-2.5 w-2.5 rounded-full bg-accent" />
       <span className="font-serif text-xs italic text-foreground/75">{label}</span>
     </div>
@@ -41,7 +44,10 @@ export function MenuCorner({ onHelp }: { onHelp?: () => void } = {}) {
     }
   };
   return (
-    <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
+    <div
+      className="absolute right-5 z-20 flex items-center gap-2 safe-offset-top safe-right"
+      style={{ ["--safe-top-base" as string]: "1.25rem" }}
+    >
       <button
         title="Begin a new world"
         onClick={onReset}
