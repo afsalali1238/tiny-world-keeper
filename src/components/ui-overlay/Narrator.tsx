@@ -280,7 +280,10 @@ export function Narrator() {
   const holdMs = readingDuration(visible.text);
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-28 z-20 flex justify-center px-6">
+    <div
+      className="pointer-events-none absolute inset-x-0 z-20 flex justify-center px-6 safe-offset-bottom safe-x"
+      style={{ ["--safe-bottom-base" as string]: "7rem" }}
+    >
       <p
         key={visible.id}
         className="terrarium-narrate max-w-2xl text-center font-serif text-base italic leading-relaxed text-cream md:text-lg"
