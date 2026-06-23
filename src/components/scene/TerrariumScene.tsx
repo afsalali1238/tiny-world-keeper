@@ -54,7 +54,7 @@ export function TerrariumScene() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.25, 2.55], fov: 36 }}
+      camera={{ position: [0, 0.2, 3.35], fov: 32 }}
       gl={{ antialias: true }}
     >
       <SceneBackground />
