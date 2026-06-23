@@ -34,6 +34,16 @@ export function OfflineCard() {
 
   if (intro !== "done" || !gap) return null;
   const text = beatFor(years, planetName);
+  const glyph =
+    years < 2
+      ? "a short while"
+      : years < 12
+        ? "a handful of years"
+        : years < 40
+          ? "a generation"
+          : years < 200
+            ? "centuries"
+            : "an age";
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-ink/55 p-6 backdrop-blur-sm">
@@ -42,7 +52,7 @@ export function OfflineCard() {
           while you were away
         </p>
         <p className="mt-3 font-serif text-3xl italic text-foreground/90">
-          {years} {years === 1 ? "year" : "years"}
+          {glyph}
         </p>
         <p className="mt-4 font-serif text-sm italic leading-relaxed text-foreground/75">
           {text}
