@@ -21,24 +21,45 @@ function TickDriver() {
   return null;
 }
 
-function GlassCamera() {
-  const { camera } = useThree();
+// Frames the planet so it always floats with calm space around it.
+// We compute the camera Z so that a sphere of radius PLANET_R fits inside
+// the smaller screen dimension with HALO_RATIO of breathing room — on phones
+// in portrait this means the planet only fills ~55% of the screen height.
+const PLANET_R = 1.25; // radius incl. atmosphere/aurora halo
+const HALO_RATIO = 0.42; // 0..1 — fraction of viewport left as breathing room
+
+function FitCamera() {
+  const { camera, size } = useThree();
   const baseZ = useRef(camera.position.z);
+  const targetZ = useRef(camera.position.z);
+
+  useEffect(() => {
+    const cam = camera as THREE.PerspectiveCamera;
+    if (!cam.isPerspectiveCamera) return;
+    const aspect = size.width / size.height;
+    const vTan = Math.tan((cam.fov * Math.PI) / 360);
+    // distance needed so the planet fits vertically...
+    const zVert = PLANET_R / (vTan * (1 - HALO_RATIO));
+    // ...and horizontally (matters in portrait when aspect < 1).
+    const zHoriz = PLANET_R / (vTan * aspect * (1 - HALO_RATIO));
+    const z = Math.max(zVert, zHoriz);
+    baseZ.current = z;
+    targetZ.current = z;
+  }, [camera, size.width, size.height]);
+
   useFrame(() => {
     const at = useWorld.getState().glassMomentAt;
-    if (!at) {
-      // ease back to base
-      camera.position.z += (baseZ.current - camera.position.z) * 0.06;
-      return;
+    let target = baseZ.current;
+    if (at) {
+      const t = (Date.now() - at) / 2600;
+      const pull = Math.sin(Math.min(1, Math.max(0, t)) * Math.PI);
+      target = baseZ.current + pull * 2.6;
     }
-    const t = (Date.now() - at) / 2600; // 0..1 over duration
-    // pull back then return: a bell curve
-    const pull = Math.sin(Math.min(1, Math.max(0, t)) * Math.PI);
-    const target = baseZ.current + pull * 2.6;
-    camera.position.z += (target - camera.position.z) * 0.15;
+    camera.position.z += (target - camera.position.z) * 0.12;
   });
   return null;
 }
+
 
 function SceneBackground() {
   const { scene } = useThree();
