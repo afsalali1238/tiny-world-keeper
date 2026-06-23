@@ -448,21 +448,24 @@ export const useWorld = create<WorldState & Actions>()(
     }),
     {
       name: "terrarium:v1",
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown, _version: number) => {
         const p = (persisted ?? {}) as Partial<WorldState>;
-        // Old intro values are obsolete in the new assembly flow; if a player
-        // wasn't already in the live world, restart the opening cleanly.
-        const validIntros = new Set(["gift", "name", "spray", "warm", "seed", "pour", "done"]);
-        const introOk = p.intro && validIntros.has(p.intro);
+        // Old intro flow had a "pour" jar step that no longer exists.
+        // Lift those players into the live world rather than soft-lock them.
+        let intro = p.intro;
+        if (intro === "pour") intro = "done";
+        const validIntros = new Set(["gift", "warm", "spray", "seed", "name", "done"]);
+        if (!intro || !validIntros.has(intro)) intro = "gift";
         return {
           ...p,
-          intro: introOk ? p.intro : "gift",
+          intro,
           speed: p.speed ?? 1,
           unlockedCuriosityIds: p.unlockedCuriosityIds ?? [],
           playMs: p.playMs ?? 0,
           pivotFired: p.pivotFired ?? false,
           lastSeenAt: p.lastSeenAt ?? null,
+          followed: p.followed ?? null,
         } as WorldState;
       },
       partialize: (s) => ({
