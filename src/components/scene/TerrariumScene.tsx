@@ -89,8 +89,9 @@ export function TerrariumScene() {
         <OrbitControls
           enablePan={false}
           enableZoom={true}
-          minDistance={isNarrow ? 3.0 : 2.2}
-          maxDistance={isNarrow ? 7.5 : 5.5}
+          minDistance={isPhone ? 4.0 : isNarrow ? 3.0 : 2.2}
+          maxDistance={isPhone ? 9.0 : isNarrow ? 7.5 : 5.5}
+
           zoomSpeed={0.6}
           enableDamping
           dampingFactor={0.08}
