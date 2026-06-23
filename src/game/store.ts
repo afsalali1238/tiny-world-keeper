@@ -40,6 +40,8 @@ interface Actions {
 
   clearOfflineGap: () => void;
   touchLastSeen: () => void;
+  followPerson: (pos: [number, number, number]) => void;
+  unfollowPerson: () => void;
   reset: () => void;
 }
 
