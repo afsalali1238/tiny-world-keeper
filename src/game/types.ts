@@ -8,9 +8,18 @@ export type IntroStep =
   | "seed" // tap seed to plant the first life
   | "pour" // tap the container to dump the first people
   | "done"
-  | "transcend";
-export type ToolKind = "rain" | "sun" | "wind" | "seed";
+  | "transcend"
+  | "escape"
+  | "corruption";
+export type ToolKind = "rain" | "sun" | "wind" | "seed" | "lightning" | "aegis";
 export type Speed = 0.5 | 1 | 4;
+
+export interface BlightNode {
+  id: number;
+  pos: [number, number, number];
+  size: number; // 0 to 1
+  bornAt: number;
+}
 
 export interface TouchEffect {
   id: number;
@@ -38,6 +47,9 @@ export interface WorldState {
   resolvedChoiceIds: string[];
   firedMythIds: string[];
   selectedTool: ToolKind | null;
+  unlockedTools: ToolKind[];
+  unlockedPassives: string[];
+  blightNodes: BlightNode[];
   effects: TouchEffect[];
   audioOn: boolean;
   currentNarration: { id: string; text: string; bornAt: number } | null;

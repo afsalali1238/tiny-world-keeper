@@ -35,6 +35,22 @@ const TOOLS: { kind: ToolKind; label: string; hint: string; icon: ReactNode }[] 
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V12"/><path d="M12 12c-3 0-6-2-6-6 4 0 6 2 6 6z"/><path d="M12 12c3 0 6-2 6-6-4 0-6 2-6 6z"/></svg>
     ),
   },
+  {
+    kind: "lightning",
+    label: "Lightning",
+    hint: "tap the Blight to strike it down",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    ),
+  },
+  {
+    kind: "aegis",
+    label: "Aegis",
+    hint: "shield the world from impending disaster",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    ),
+  },
 ];
 
 const INTRO_TOOL: Partial<Record<IntroStep, ToolKind>> = {
@@ -47,6 +63,7 @@ export function ToolDock() {
   const intro = useWorld((s) => s.intro);
   const selectedTool = useWorld((s) => s.selectedTool);
   const setTool = useWorld((s) => s.setTool);
+  const unlockedTools = useWorld((s) => s.unlockedTools);
 
   // Hide throughout Genesis. The dock is for free play only.
   if (intro !== "done") return null;
@@ -75,7 +92,7 @@ export function ToolDock() {
         {active ? active.hint : isWeak ? "They doubt you. Your power wanes." : "pick up a tool, then touch the world"}
       </p>
       <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-card/85 px-2 py-2 backdrop-blur shadow-sm">
-        {TOOLS.map((t) => {
+        {TOOLS.filter(t => unlockedTools?.includes(t.kind)).map((t) => {
           const isOn = selectedTool === t.kind;
           const disabled = lockedTool !== null && lockedTool !== t.kind;
           return (

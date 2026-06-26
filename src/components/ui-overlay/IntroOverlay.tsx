@@ -31,6 +31,8 @@ export function IntroOverlay() {
 
   if (intro === "done") return null;
   if (intro === "transcend") return <TranscendBeat />;
+  if (intro === "escape") return <EscapeBeat />;
+  if (intro === "corruption") return <CorruptionBeat />;
   if (intro === "gift")
     return (
       <GiftBeat
@@ -172,6 +174,49 @@ function TranscendBeat() {
         <p className="terrarium-fade font-serif text-sm italic text-foreground/50 delay-1000 mt-8">
           The container is open.
         </p>
+      </div>
+      </div>
+    </div>
+  );
+}
+
+function EscapeBeat() {
+  return (
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur px-6 text-center">
+      <div className="flex flex-col gap-4">
+        <p className="terrarium-fade font-serif text-3xl italic text-foreground md:text-4xl text-amber-500">
+          They have broken the sky.
+        </p>
+        <p className="terrarium-fade font-serif text-lg italic text-foreground/70 delay-500">
+          Driven by fear and curiosity, they built a ship to pierce the glass.
+        </p>
+        <p className="terrarium-fade font-serif text-sm italic text-foreground/50 delay-1000 mt-8">
+          The container is empty.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CorruptionBeat() {
+  return (
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur px-6 text-center">
+      <div className="flex flex-col gap-4">
+        <p className="terrarium-fade font-serif text-3xl italic text-red-500 md:text-4xl">
+          The Blight has consumed them.
+        </p>
+        <p className="terrarium-fade font-serif text-lg italic text-foreground/70 delay-500">
+          Your world has fallen to darkness.
+        </p>
+        <p className="terrarium-fade font-serif text-sm italic text-foreground/50 delay-1000 mt-8">
+          The container goes silent.
+        </p>
+        <button
+          onClick={() => useWorld.getState().reset()}
+          className="terrarium-fade mt-8 rounded-full bg-red-900/40 px-5 py-2 text-sm font-medium text-red-100 transition hover:scale-[1.03] delay-1000 border border-red-500/30"
+        >
+          Begin Anew
+        </button>
       </div>
     </div>
   );

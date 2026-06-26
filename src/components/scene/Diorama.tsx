@@ -112,6 +112,7 @@ export function Diorama({ geom }: Props) {
 
   useFrame((state) => {
     const life = lifeRef.current;
+    const era = useWorld.getState().era;
     const houseCount = Math.min(houses.length, Math.floor(life * houses.length * 1.6));
     const treeCount = Math.min(trees.length, Math.floor(life * trees.length * 1.8));
     const rockCount = Math.min(rocks.length, Math.floor((0.2 + life) * rocks.length));
@@ -175,14 +176,19 @@ export function Diorama({ geom }: Props) {
     // houses
     houses.forEach((s, i) => {
       const visible = i < houseCount;
-      const bodyScale = new THREE.Vector3(s.scale * 1.2, s.scale * 1.1, s.scale * 1.1);
+      
+      let heightMult = 1.0;
+      if (era >= 5) heightMult = 3.0; // Towers
+      else if (era >= 3) heightMult = 1.8; // Tall Houses
+
+      const bodyScale = new THREE.Vector3(s.scale * 1.2, s.scale * 1.1 * heightMult, s.scale * 1.1);
       writeAlignedMatrix(
         houseBodyRef.current,
         houseBodyOutlineRef.current,
         i,
         s.sample,
         bodyScale,
-        s.scale * 0.55,
+        s.scale * 0.55 * heightMult,
         s.yaw,
         visible,
         1.1,
@@ -195,7 +201,7 @@ export function Diorama({ geom }: Props) {
         i,
         s.sample,
         roofScale,
-        s.scale * 1.55,
+        s.scale * 1.1 * heightMult + s.scale * 0.45,
         s.yaw + Math.PI / 4,
         visible,
         1.08,

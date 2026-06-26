@@ -85,6 +85,9 @@ const createInitialWorld = (): WorldState => ({
   resolvedChoiceIds: [],
   firedMythIds: [],
   selectedTool: null,
+  unlockedTools: ["sun", "rain", "wind", "seed"],
+  unlockedPassives: [],
+  blightNodes: [],
   effects: [],
   audioOn: false,
   currentNarration: null,
@@ -308,8 +311,45 @@ export const useWorld = create<WorldState & Actions>()(
         } else if (era === ERAS.length - 1 && ticks >= acc && finalLife > 0) {
            // Survived the final era!
            finalLife = 1.0; 
-           nextIntro = "transcend";
+           
+           if (s.traits.fear > 0.7 && s.traits.curiosity > 0.5) {
+             nextIntro = "escape"; // New ending!
+           } else {
+             nextIntro = "transcend";
+           }
         }
+        
+        // Blight Logic
+        let nextBlightNodes = [...(s.blightNodes || [])];
+        if (era >= 2 && Math.random() < 0.01 && nextBlightNodes.length < 5) {
+          // Spawn new blight
+          const pos: [number, number, number] = [
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20
+          ];
+          nextBlightNodes.push({ id: Math.random(), pos, size: 0.1, bornAt: Date.now() });
+        }
+        
+        let blightDrain = 0;
+        nextBlightNodes = nextBlightNodes.map(n => {
+          const size = Math.min(1.0, n.size + 0.002);
+          blightDrain += size * 0.0005;
+          return { ...n, size };
+        });
+        
+        if (nextBlightNodes.length >= 5 && nextBlightNodes.every(n => n.size > 0.8)) {
+           // Corruption loss
+           finalLife = 0;
+           nextIntro = "corruption";
+        }
+        
+        let finalLifeWithBlight = clamp(finalLife - blightDrain);
+
+        // Automatic Era Unlocks
+        let unlockedTools = [...(s.unlockedTools || ["sun", "rain", "wind", "seed"])];
+        if (era >= 2 && !unlockedTools.includes("lightning")) unlockedTools.push("lightning");
+        if (era >= 4 && !unlockedTools.includes("aegis")) unlockedTools.push("aegis");
         
         const ageName = ageNameForEra(era);
 
@@ -318,10 +358,12 @@ export const useWorld = create<WorldState & Actions>()(
 
         let patch: Partial<WorldState> = {
           ticks,
-          life: finalLife,
+          life: finalLifeWithBlight,
           warmth: finalWarmth,
           water: finalWater,
           intro: nextIntro,
+          blightNodes: nextBlightNodes,
+          unlockedTools,
           traits,
           era,
           ageName,
@@ -493,6 +535,17 @@ export const useWorld = create<WorldState & Actions>()(
           patch.life = clamp(s.life + 0.002 * powerMult);
         } else if (tool === "seed") {
           patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03 * powerMult));
+        } else if (tool === "lightning") {
+          patch.weather = "storm";
+          // Lightning damages/destroys blight
+          if (s.blightNodes && s.blightNodes.length > 0) {
+            patch.blightNodes = s.blightNodes.map(node => {
+               // Distance check roughly based on positions, but for simplicity, strike a random one if close, or just strike the largest
+               return { ...node, size: Math.max(0, node.size - 0.4 * powerMult) };
+            }).filter(n => n.size > 0);
+          }
+        } else if (tool === "aegis") {
+          patch.flags = { ...s.flags, "aegis_active": true };
         }
 
         // Combo aftermath.

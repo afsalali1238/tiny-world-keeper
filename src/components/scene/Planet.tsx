@@ -6,6 +6,7 @@ import { useWorld } from "@/game/store";
 import { getToonGradient, INK } from "@/game/toon-gradient";
 import { Diorama } from "./Diorama";
 import { TouchEffects } from "./TouchEffects";
+import { Blight } from "./Blight";
 
 interface Props {
   cold?: boolean;
@@ -158,6 +159,7 @@ export function Planet({ cold = false }: Props) {
       )}
 
       {intro !== "gift" && intro !== "name" && <Diorama geom={geom} />}
+      {intro !== "gift" && intro !== "name" && <Blight />}
       {intro !== "gift" && intro !== "name" && <TouchEffects />}
     </group>
   );
