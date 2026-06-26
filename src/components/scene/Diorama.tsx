@@ -310,8 +310,8 @@ export function Diorama({ geom }: Props) {
       // smooth fade across the terminator instead of a hard cutoff
       const nightAmt = THREE.MathUtils.clamp((0.1 - facing) * 4, 0, 1);
       const visible = i < houseCount && nightAmt > 0.01;
-      const coreScale = s.scale * 2.6 * nightAmt * flicker;
-      const haloScale = s.scale * 6.5 * nightAmt;
+      const coreScale = s.scale * 0.8 * nightAmt * flicker;
+      const haloScale = s.scale * 3.0 * nightAmt;
       const sc = visible
         ? new THREE.Vector3(coreScale, coreScale, coreScale)
         : new THREE.Vector3(0, 0, 0);
@@ -410,28 +410,27 @@ export function Diorama({ geom }: Props) {
         <meshToonMaterial {...toonProps} color="#8d8e8a" />
       </instancedMesh>
 
-      {/* NIGHT LIGHTS — soft halo + bright core, additive so they read across the terminator */}
+      {/* NIGHT LIGHTS - soft halo + bright core */}
       <instancedMesh ref={lightHaloRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false} renderOrder={5}>
         <sphereGeometry args={[0.5, 10, 10]} />
         <meshBasicMaterial
           color="#ffb84a"
           transparent
-          opacity={0.28}
-          blending={THREE.AdditiveBlending}
+          opacity={0.3}
           depthWrite={false}
-          depthTest={false}
+          depthTest={true}
           toneMapped={false}
         />
       </instancedMesh>
       <instancedMesh ref={lightsRef} args={[undefined, undefined, LIGHT_CAP]} frustumCulled={false} renderOrder={6}>
         <sphereGeometry args={[0.5, 10, 10]} />
         <meshBasicMaterial
-          color="#fff1c2"
+          color="#ffeab3"
           transparent
-          opacity={1}
+          opacity={0.9}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
-          depthTest={false}
+          depthTest={true}
           toneMapped={false}
         />
       </instancedMesh>
