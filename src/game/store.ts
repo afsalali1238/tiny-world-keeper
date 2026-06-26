@@ -88,6 +88,7 @@ const createInitialWorld = (): WorldState => ({
   unlockedTools: ["sun", "rain", "wind", "seed"],
   unlockedPassives: [],
   blightNodes: [],
+  prayers: [],
   effects: [],
   audioOn: false,
   currentNarration: null,
@@ -263,7 +264,7 @@ export const useWorld = create<WorldState & Actions>()(
         if (s.traits.curiosity > 0.6) tempoMult = 1.25;
         
         if (s.life > 0.1) {
-          faithRegen += (s.traits.faith > 0.5 ? 0.002 : 0);
+          faithRegen += (s.traits.faith > 0.5 ? 0.002 : 0) + (s.life * 0.005);
         }
 
         // Wait, unused local life was here
@@ -296,6 +297,12 @@ export const useWorld = create<WorldState & Actions>()(
           finalWarmth = clamp(s.warmth + (s.warmth >= 0.5 ? 0.005 : -0.005));
           finalWater = clamp(s.water + (s.water >= 0.5 ? 0.005 : -0.005));
           
+          // Industrialization cost (Era 4+)
+          if (era >= 4) {
+             finalWater -= 0.001;
+             finalWarmth += 0.0005;
+          }
+
           // Life drains quickly if conditions are harsh
           if (Math.abs(finalWarmth - 0.5) > 0.3 || Math.abs(finalWater - 0.5) > 0.3) {
              lifeGrowth -= 0.01;
@@ -346,6 +353,22 @@ export const useWorld = create<WorldState & Actions>()(
         
         let finalLifeWithBlight = clamp(finalLife - blightDrain);
 
+        // Prayer Logic
+        let nextPrayers = [...(s.prayers || [])].filter(p => Date.now() - p.bornAt < 5000);
+        if (finalLifeWithBlight > 0.2 && Math.random() < 0.02 && nextPrayers.length < 3) {
+           const pos: [number, number, number] = [
+             (Math.random() - 0.5) * 20,
+             (Math.random() - 0.5) * 20,
+             (Math.random() - 0.5) * 20
+           ];
+           let text = "Please...";
+           if (s.traits.fear > 0.6) text = "Save us...";
+           else if (s.traits.curiosity > 0.6) text = "What is beyond the glass?";
+           else if (s.traits.harmony > 0.6) text = "We are at peace.";
+           else if (s.weather === "storm") text = "No more lightning!";
+           nextPrayers.push({ id: Math.random(), text, pos, bornAt: Date.now() });
+        }
+
         // Automatic Era Unlocks
         let unlockedTools = [...(s.unlockedTools || ["sun", "rain", "wind", "seed"])];
         if (era >= 2 && !unlockedTools.includes("lightning")) unlockedTools.push("lightning");
@@ -363,11 +386,13 @@ export const useWorld = create<WorldState & Actions>()(
           water: finalWater,
           intro: nextIntro,
           blightNodes: nextBlightNodes,
+          prayers: nextPrayers,
           unlockedTools,
           traits,
           era,
           ageName,
           weather,
+          speed: s.speed,
           playMs: s.playMs + accumulated * 1000,
         };
 
@@ -526,6 +551,10 @@ export const useWorld = create<WorldState & Actions>()(
           patch.water = clamp(s.water + (introBoost ? 0.5 : 0.06 * powerMult));
           patch.weather = "rain";
           patch.life = clamp(s.life + 0.004 * powerMult);
+          // Elemental Synergy: Sun -> Rain = Rainbow
+          if (s.lastToolEvent?.kind === "sun" && Date.now() - s.lastToolEvent.ts < 5000) {
+             patch.traits = { ...(patch.traits || s.traits), harmony: clamp((patch.traits?.harmony || s.traits.harmony) + 0.15) };
+          }
         } else if (tool === "sun") {
           patch.warmth = clamp(s.warmth + (introBoost ? 0.55 : 0.06 * powerMult));
           patch.weather = "clear";
@@ -537,12 +566,23 @@ export const useWorld = create<WorldState & Actions>()(
           patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03 * powerMult));
         } else if (tool === "lightning") {
           patch.weather = "storm";
-          // Lightning damages/destroys blight
+          // Targeted Lightning damages blight near the click pos
           if (s.blightNodes && s.blightNodes.length > 0) {
+            let hitBlight = false;
             patch.blightNodes = s.blightNodes.map(node => {
-               // Distance check roughly based on positions, but for simplicity, strike a random one if close, or just strike the largest
-               return { ...node, size: Math.max(0, node.size - 0.4 * powerMult) };
+               const dx = node.pos[0] - pos[0];
+               const dy = node.pos[1] - pos[1];
+               const dz = node.pos[2] - pos[2];
+               if (Math.sqrt(dx*dx + dy*dy + dz*dz) < 4.0) {
+                 hitBlight = true;
+                 return { ...node, size: Math.max(0, node.size - 0.6 * powerMult) };
+               }
+               return node;
             }).filter(n => n.size > 0);
+            
+            if (!hitBlight) {
+               patch.traits = { ...(patch.traits || s.traits), fear: clamp((patch.traits?.fear || s.traits.fear) + 0.1) };
+            }
           }
         } else if (tool === "aegis") {
           patch.flags = { ...s.flags, "aegis_active": true };

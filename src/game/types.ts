@@ -21,6 +21,13 @@ export interface BlightNode {
   bornAt: number;
 }
 
+export interface Prayer {
+  id: number;
+  text: string;
+  pos: [number, number, number];
+  bornAt: number;
+}
+
 export interface TouchEffect {
   id: number;
   kind: ToolKind;
@@ -50,6 +57,7 @@ export interface WorldState {
   unlockedTools: ToolKind[];
   unlockedPassives: string[];
   blightNodes: BlightNode[];
+  prayers: Prayer[];
   effects: TouchEffect[];
   audioOn: boolean;
   currentNarration: { id: string; text: string; bornAt: number } | null;

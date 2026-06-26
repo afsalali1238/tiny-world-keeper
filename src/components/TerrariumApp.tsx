@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { TerrariumScene } from "@/components/scene/TerrariumScene";
 import { IntroOverlay } from "@/components/ui-overlay/IntroOverlay";
+import { ProphecyOverlay } from "@/components/ui-overlay/ProphecyOverlay";
 import { EraRibbon, LivingPulse, MenuCorner } from "@/components/ui-overlay/HUD";
 import { ChoiceCard } from "@/components/ui-overlay/ChoiceCard";
 import { MythFeed } from "@/components/ui-overlay/MythFeed";
@@ -100,6 +101,8 @@ export function TerrariumApp() {
 
         </>
       )}
+
+      <ProphecyOverlay />
 
       <IntroOverlay />
     </div>
