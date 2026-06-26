@@ -175,7 +175,6 @@ function TranscendBeat() {
           The container is open.
         </p>
       </div>
-      </div>
     </div>
   );
 }
