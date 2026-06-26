@@ -100,12 +100,13 @@ const createInitialWorld = (): WorldState => ({
   lastSeenAt: null,
   offlineGapMs: null,
   recentCombo: null,
+  pendingConsequences: [],
   followed: null,
 });
 
 const initialWorld = createInitialWorld();
 
-const VALID_INTROS = new Set<WorldState["intro"]>(["gift", "warm", "spray", "seed", "name", "done"]);
+const VALID_INTROS = new Set<WorldState["intro"]>(["gift", "warm", "spray", "seed", "name", "done", "transcend"]);
 
 function hasName(name: string | undefined) {
   return !!name && name.trim() !== "";
@@ -240,7 +241,7 @@ export const useWorld = create<WorldState & Actions>()(
 
         tickAccumulator += realDt;
         choiceCooldown = Math.max(0, choiceCooldown - realDt);
-        if (tickAccumulator < 0.25) {
+        if (tickAccumulator < 0.85) {
           // still bump playMs lightly for sub-tick accumulation
           return;
         }
@@ -248,19 +249,68 @@ export const useWorld = create<WorldState & Actions>()(
         tickAccumulator = 0;
 
         const ticks = s.ticks + 1;
-        const life = clamp(s.life + 0.0025);
+        
+        // Belief Modifiers
+        let lifeGrowth = 0.0025;
+        let tempoMult = 1.0;
+        let faithRegen = 0.001;
 
-        // era advancement
+        if (s.traits.fear > 0.6) lifeGrowth *= 0.5;
+        if (s.traits.harmony > 0.6) lifeGrowth *= 1.5;
+        if (s.traits.curiosity > 0.6) tempoMult = 1.25;
+        
+        if (s.life > 0.1) {
+          faithRegen += (s.traits.faith > 0.5 ? 0.002 : 0);
+        }
+
+        // Wait, unused local life was here
+        const traits = {
+          ...s.traits,
+          faith: clamp(s.traits.faith + faithRegen),
+        };
+
         let era = s.era;
         let acc = 0;
+        let isReckoning = false;
+        
         for (let i = 0; i < ERAS.length; i++) {
-          acc += ERAS[i].durationTicks;
+          acc += (ERAS[i].durationTicks / tempoMult);
           if (ticks < acc) {
             era = i;
+            if (ERAS[i].name === "The Reckoning") isReckoning = true;
             break;
           }
           era = i;
         }
+        
+        let nextIntro = s.intro;
+        let finalWarmth = s.warmth;
+        let finalWater = s.water;
+        
+        // The Reckoning Engine
+        if (isReckoning) {
+          // Push warmth and water away from 0.5
+          finalWarmth = clamp(s.warmth + (s.warmth >= 0.5 ? 0.005 : -0.005));
+          finalWater = clamp(s.water + (s.water >= 0.5 ? 0.005 : -0.005));
+          
+          // Life drains quickly if conditions are harsh
+          if (Math.abs(finalWarmth - 0.5) > 0.3 || Math.abs(finalWater - 0.5) > 0.3) {
+             lifeGrowth -= 0.01;
+          }
+        }
+        
+        let finalLife = clamp(s.life + lifeGrowth);
+        
+        // Endings
+        if (isReckoning && finalLife <= 0) {
+           // Collapse
+           // nextIntro stays "done" but life is 0.
+        } else if (era === ERAS.length - 1 && ticks >= acc && finalLife > 0) {
+           // Survived the final era!
+           finalLife = 1.0; 
+           nextIntro = "transcend";
+        }
+        
         const ageName = ageNameForEra(era);
 
         let weather = s.weather;
@@ -268,7 +318,11 @@ export const useWorld = create<WorldState & Actions>()(
 
         let patch: Partial<WorldState> = {
           ticks,
-          life,
+          life: finalLife,
+          warmth: finalWarmth,
+          water: finalWater,
+          intro: nextIntro,
+          traits,
           era,
           ageName,
           weather,
@@ -312,6 +366,17 @@ export const useWorld = create<WorldState & Actions>()(
       surfaceChoiceIfReady: () => {
         const s = get();
         if (s.activeChoiceId || s.intro !== "done" || choiceCooldown > 0) return;
+        
+        // Process pending consequences first
+        const dueConsequence = s.pendingConsequences.find((c) => c.tick <= s.ticks);
+        if (dueConsequence) {
+          set({
+            activeChoiceId: dueConsequence.dilemmaId,
+            pendingConsequences: s.pendingConsequences.filter((c) => c !== dueConsequence),
+          });
+          return;
+        }
+
         const eligible = CHOICE_CARDS.filter(
           (c) => c.trigger(s) && !(c.once && s.resolvedChoiceIds.includes(c.id)),
         );
@@ -381,9 +446,18 @@ export const useWorld = create<WorldState & Actions>()(
         const { hit, mem } = detectCombo(tool, s, comboMemory);
         comboMemory = mem;
         let recentCombo = s.recentCombo;
+        let pendingConsequences = [...s.pendingConsequences];
+        
         if (hit) {
           flags[hit.flag] = true;
           recentCombo = { kind: hit.kind, ts: Date.now() };
+          
+          // Systemic Echoes: Delay a consequence for the combo
+          if (hit.kind === "drought") {
+            pendingConsequences.push({ tick: s.ticks + 35, dilemmaId: "dilemma_heatwave" });
+          } else if (hit.kind === "steam") {
+            pendingConsequences.push({ tick: s.ticks + 25, dilemmaId: "dilemma_flood" });
+          }
         }
 
         const patch: Partial<WorldState> = {
@@ -391,24 +465,34 @@ export const useWorld = create<WorldState & Actions>()(
           flags,
           lastToolEvent: { kind: tool, ts: Date.now() },
           recentCombo,
+          pendingConsequences,
         };
 
         // Intro: each correct tap is BIG and advances the next step.
         const introBoost = s.intro !== "done";
 
+        // Faith cost & weakness
+        let powerMult = 1.0;
+        if (!introBoost) {
+          patch.traits = { ...s.traits, faith: clamp(s.traits.faith - 0.05) };
+          if (s.traits.faith < 0.15) {
+            powerMult = 0.5;
+          }
+        }
+
         if (tool === "rain") {
-          patch.water = clamp(s.water + (introBoost ? 0.5 : 0.06));
+          patch.water = clamp(s.water + (introBoost ? 0.5 : 0.06 * powerMult));
           patch.weather = "rain";
-          patch.life = clamp(s.life + 0.004);
+          patch.life = clamp(s.life + 0.004 * powerMult);
         } else if (tool === "sun") {
-          patch.warmth = clamp(s.warmth + (introBoost ? 0.55 : 0.06));
+          patch.warmth = clamp(s.warmth + (introBoost ? 0.55 : 0.06 * powerMult));
           patch.weather = "clear";
-          patch.life = clamp(s.life + 0.003);
+          patch.life = clamp(s.life + 0.003 * powerMult);
         } else if (tool === "wind") {
           patch.weather = "clear";
-          patch.life = clamp(s.life + 0.002);
+          patch.life = clamp(s.life + 0.002 * powerMult);
         } else if (tool === "seed") {
-          patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03));
+          patch.life = clamp(s.life + (introBoost ? 0.06 : 0.03 * powerMult));
         }
 
         // Combo aftermath.
@@ -552,6 +636,7 @@ export const useWorld = create<WorldState & Actions>()(
           pivotFired: p.pivotFired ?? false,
           lastSeenAt: p.lastSeenAt ?? null,
           followed: p.followed ?? null,
+          pendingConsequences: p.pendingConsequences ?? [],
         } as WorldState;
       },
       partialize: (s) => ({
@@ -578,6 +663,7 @@ export const useWorld = create<WorldState & Actions>()(
         playMs: s.playMs,
         pivotFired: s.pivotFired,
         lastSeenAt: s.lastSeenAt,
+        pendingConsequences: s.pendingConsequences,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

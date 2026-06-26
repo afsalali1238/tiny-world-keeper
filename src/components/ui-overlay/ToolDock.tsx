@@ -54,13 +54,25 @@ export function ToolDock() {
   const lockedTool = INTRO_TOOL[intro] ?? null;
   const active = TOOLS.find((t) => t.kind === selectedTool);
 
+  const faith = useWorld((s) => s.traits.faith);
+  const isWeak = faith < 0.15;
+
   return (
     <div
       className="pointer-events-none absolute inset-x-0 z-30 flex flex-col items-center gap-2 safe-offset-bottom safe-x"
       style={{ ["--safe-bottom-base" as string]: "1rem" }}
     >
+      <div className="flex flex-col items-center gap-1">
+        <p className="font-serif text-[10px] uppercase tracking-widest text-foreground/40">Faith</p>
+        <div className="h-1 w-24 overflow-hidden rounded-full bg-black/40">
+          <div
+            className="h-full bg-accent transition-all duration-300 ease-out"
+            style={{ width: `${Math.round(faith * 100)}%` }}
+          />
+        </div>
+      </div>
       <p className="font-serif text-xs italic text-foreground/55 min-h-[1em]">
-        {active ? active.hint : "pick up a tool, then touch the world"}
+        {active ? active.hint : isWeak ? "They doubt you. Your power wanes." : "pick up a tool, then touch the world"}
       </p>
       <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-card/85 px-2 py-2 backdrop-blur shadow-sm">
         {TOOLS.map((t) => {
@@ -78,6 +90,8 @@ export function ToolDock() {
                   ? "text-foreground/20 cursor-not-allowed"
                   : isOn
                   ? "bg-accent text-accent-foreground scale-110 shadow"
+                  : isWeak
+                  ? "text-foreground/30 hover:bg-secondary/70 opacity-60"
                   : "text-foreground/70 hover:bg-secondary/70")
               }
             >

@@ -123,4 +123,26 @@ export const CHOICE_CARDS: ChoiceCard[] = [
     ],
     trigger: (w) => w.era >= 3,
   },
+  {
+    id: "dilemma_heatwave",
+    once: true,
+    prompt: "The rivers run dry. The heat you brought is suffocating them.",
+    sub: "They beg for relief...",
+    options: [
+      { label: "send a deluge", world: { weather: "rain", water: 0.1 }, effects: { faith: -0.15, fear: 0.1 } },
+      { label: "let them burn", ghost: true, world: { life: -0.05 }, effects: { fear: 0.2, harmony: -0.1 } },
+    ],
+    trigger: () => false, // Triggered manually via consequences
+  },
+  {
+    id: "dilemma_flood",
+    once: true,
+    prompt: "The waters rise. Your rains have flooded the lowlands.",
+    sub: "They scramble for higher ground...",
+    options: [
+      { label: "send the wind", world: { weather: "clear", water: -0.1 }, effects: { faith: -0.15, harmony: 0.1 } },
+      { label: "watch them drown", ghost: true, world: { life: -0.05 }, effects: { fear: 0.2, faith: -0.1 } },
+    ],
+    trigger: () => false, // Triggered manually via consequences
+  }
 ];

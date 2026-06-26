@@ -30,6 +30,7 @@ export function IntroOverlay() {
   const setPlanetName = useWorld((s) => s.setPlanetName);
 
   if (intro === "done") return null;
+  if (intro === "transcend") return <TranscendBeat />;
   if (intro === "gift")
     return (
       <GiftBeat
@@ -153,6 +154,24 @@ function NameBeat({ onName }: { onName: (n: string) => void }) {
         >
           Then it begins
         </button>
+      </div>
+    </div>
+  );
+}
+
+function TranscendBeat() {
+  return (
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur px-6 text-center">
+      <div className="flex flex-col gap-4">
+        <p className="terrarium-fade font-serif text-3xl italic text-foreground md:text-4xl">
+          They have outgrown you.
+        </p>
+        <p className="terrarium-fade font-serif text-lg italic text-foreground/70 delay-500">
+          They no longer look to the sky for answers. They look to each other.
+        </p>
+        <p className="terrarium-fade font-serif text-sm italic text-foreground/50 delay-1000 mt-8">
+          The container is open.
+        </p>
       </div>
     </div>
   );

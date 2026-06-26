@@ -7,7 +7,8 @@ export type IntroStep =
   | "warm" // tap sun to brighten it
   | "seed" // tap seed to plant the first life
   | "pour" // tap the container to dump the first people
-  | "done";
+  | "done"
+  | "transcend";
 export type ToolKind = "rain" | "sun" | "wind" | "seed";
 export type Speed = 0.5 | 1 | 4;
 
@@ -55,6 +56,7 @@ export interface WorldState {
   offlineGapMs: number | null;
   // Consequence pack
   recentCombo: { kind: "steam" | "bloom" | "drought" | "exodus"; ts: number } | null;
+  pendingConsequences: { tick: number; dilemmaId: string }[];
   // Followed person (a single villager you've adopted)
   followed: {
     name: string;

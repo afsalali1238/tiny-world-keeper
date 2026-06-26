@@ -3,13 +3,23 @@ import { useWorld, lifeLabel } from "@/game/store";
 export function EraRibbon() {
   const ageName = useWorld((s) => s.ageName);
   const planetName = useWorld((s) => s.planetName);
+  const isReckoning = ageName === "The Reckoning";
+  
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-3 px-3 safe-top safe-x">
-      <div className="flex max-w-[88vw] flex-col items-center rounded-full bg-card/85 px-5 py-2 text-center shadow-md backdrop-blur-md">
-        <p className="font-serif text-[10px] uppercase tracking-[0.32em] text-foreground/55 truncate max-w-full">
+      <div 
+        className={`flex max-w-[88vw] flex-col items-center rounded-full px-5 py-2 text-center shadow-md backdrop-blur-md transition-colors ${
+          isReckoning ? "bg-red-950/80 border border-red-500/50 animate-pulse" : "bg-card/85"
+        }`}
+      >
+        <p className={`font-serif text-[10px] uppercase tracking-[0.32em] truncate max-w-full ${
+          isReckoning ? "text-red-400" : "text-foreground/55"
+        }`}>
           {planetName}
         </p>
-        <p className="font-serif text-base italic leading-tight text-foreground/90 md:text-lg truncate max-w-full">
+        <p className={`font-serif text-base italic leading-tight md:text-lg truncate max-w-full ${
+          isReckoning ? "text-red-300 font-bold tracking-widest" : "text-foreground/90"
+        }`}>
           {ageName}
         </p>
       </div>
