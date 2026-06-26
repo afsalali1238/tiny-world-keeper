@@ -7,18 +7,18 @@ export function ProphecyOverlay() {
   const ticks = useWorld((s) => s.ticks);
   const intro = useWorld((s) => s.intro);
   
-  if (intro !== "done") return null;
+  const spokenRef = useRef<string | null>(null);
 
   // Check if any disaster is approaching within 60 ticks
   const imminent = pendingConsequences.find(c => c.tick > ticks && c.tick - ticks < 60);
 
-  if (!imminent) return null;
+  let text = "";
+  if (imminent) {
+    text = "The world trembles...";
+    if (imminent.dilemmaId === "dilemma_flood") text = "The air grows heavy. A great flood approaches.";
+    if (imminent.dilemmaId === "dilemma_heatwave") text = "The sun beats down ruthlessly. A heatwave approaches.";
+  }
 
-  let text = "The world trembles...";
-  if (imminent.dilemmaId === "dilemma_flood") text = "The air grows heavy. A great flood approaches.";
-  if (imminent.dilemmaId === "dilemma_heatwave") text = "The sun beats down ruthlessly. A heatwave approaches.";
-
-  const spokenRef = useRef<string | null>(null);
   useEffect(() => {
     if (text && spokenRef.current !== text) {
       spokenRef.current = text;
@@ -27,6 +27,9 @@ export function ProphecyOverlay() {
       return () => ac.abort();
     }
   }, [text]);
+
+  if (intro !== "done") return null;
+  if (!imminent) return null;
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-32 z-40 flex flex-col items-center gap-1 px-6 text-center transition-opacity duration-1000">

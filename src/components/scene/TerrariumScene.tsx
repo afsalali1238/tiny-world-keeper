@@ -121,7 +121,9 @@ export function TerrariumScene() {
         <OrbitControls
           ref={controlsRef}
           enablePan={false}
-          enableZoom={false}
+          enableZoom={true}
+          minDistance={1.8}
+          maxDistance={8}
           enableDamping
           dampingFactor={0.08}
           rotateSpeed={0.6}
