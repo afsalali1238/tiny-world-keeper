@@ -40,6 +40,7 @@ function BlightCluster({ pos, size }: { pos: [number, number, number]; size: num
   // A thorny cluster made of a few scaled tetrahedrons
   return (
     <group ref={groupRef} position={vPos} lookAt={() => new THREE.Vector3(0, 0, 0)}>
+      <pointLight color="#8a2be2" distance={8} intensity={0.8} />
       <mesh position={[0, 0, 0]} castShadow>
         <tetrahedronGeometry args={[0.5, 1]} />
         <meshStandardMaterial ref={materialRef} color="#1a0b1c" roughness={0.9} />

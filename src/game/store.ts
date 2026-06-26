@@ -329,11 +329,16 @@ export const useWorld = create<WorldState & Actions>()(
         // Blight Logic
         let nextBlightNodes = [...(s.blightNodes || [])];
         if (era >= 2 && Math.random() < 0.01 && nextBlightNodes.length < 5) {
-          // Spawn new blight
+          // Spawn new blight on the surface
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * 2.0 * Math.PI;
+          const phi = Math.acos(2.0 * v - 1.0);
+          const r = 10.1;
           const pos: [number, number, number] = [
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20
+            r * Math.sin(phi) * Math.cos(theta),
+            r * Math.sin(phi) * Math.sin(theta),
+            r * Math.cos(phi)
           ];
           nextBlightNodes.push({ id: Math.random(), pos, size: 0.1, bornAt: Date.now() });
         }
@@ -356,10 +361,15 @@ export const useWorld = create<WorldState & Actions>()(
         // Prayer Logic
         let nextPrayers = [...(s.prayers || [])].filter(p => Date.now() - p.bornAt < 5000);
         if (finalLifeWithBlight > 0.2 && Math.random() < 0.02 && nextPrayers.length < 3) {
+           const u = Math.random();
+           const v = Math.random();
+           const theta = u * 2.0 * Math.PI;
+           const phi = Math.acos(2.0 * v - 1.0);
+           const r = 10.1;
            const pos: [number, number, number] = [
-             (Math.random() - 0.5) * 20,
-             (Math.random() - 0.5) * 20,
-             (Math.random() - 0.5) * 20
+             r * Math.sin(phi) * Math.cos(theta),
+             r * Math.sin(phi) * Math.sin(theta),
+             r * Math.cos(phi)
            ];
            let text = "Please...";
            if (s.traits.fear > 0.6) text = "Save us...";

@@ -110,7 +110,7 @@ function EffectMark({ e }: { e: TouchEffect }) {
           color={color}
           transparent
           depthWrite={false}
-          depthTest={false}
+          depthTest={true}
           side={THREE.DoubleSide}
           toneMapped={false}
         />
@@ -122,7 +122,7 @@ function EffectMark({ e }: { e: TouchEffect }) {
           color={color}
           transparent
           depthWrite={false}
-          depthTest={false}
+          depthTest={true}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           toneMapped={false}
