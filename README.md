@@ -1,178 +1,91 @@
-# The Terrarium
+# The Terrarium (V3: Survival Management God-Game)
 
-A quiet god-game diorama built for the browser. You are a **Keeper** — a silent watcher above a small living world. There is no score, no enemy, and no ending. Watch it turn, tend it gently, and see what stories the people inside invent about you.
+A gorgeous, tense god-game diorama built for the browser. You are a **Keeper** — a silent watcher above a small living world. Watch it turn, tend it carefully, manage your Faith economy, and protect your tiny citizens from their own industrial hubris and the encroaching corruption.
 
-> “You are a Keeper. In your hands is a small living world. There is no score, no enemy, no ending. Watch it. Tend it. The people inside will never know you, but they will be shaped by what you do.”
+> “You are a Keeper. In your hands is a small living world. Tend it. Protect it. The people inside will never know you, but their survival depends entirely on your timing.”
 
 ---
 
 ## What this is
 
-**The Terrarium** is a slow, ambient world-tending toy. A tiny planet floats in soft light. Time passes quickly down there — days blink by, seasons roll, and civilisations grow between your glances. Your only power is a handful of gentle gestures: rain, sun, wind, seed.
+**The Terrarium** started as a slow, ambient world-tending toy, but has evolved into a fully-fledged survival management game. A tiny planet floats in soft light. Time passes quickly down there — days blink by, seasons roll, and civilisations grow between your glances. 
 
-It was built as a **single-session meditation on scale**: the player is vast and patient; the world is small and forgetful. The game remembers how you treat it, but it never judges.
+You must manage a finite resource called **Faith** to cast miracles, counteract the environmental damage of late-stage industrialization, and fight off physical manifestations of corruption.
 
 ---
 
 ## How to play
 
+### Core Mechanics & Economy
+
+- **Faith (Devotion):** You cannot cast miracles for free. Every tool requires Faith. Faith regenerates passively, and the *speed* of regeneration is directly tied to your population size (`life`). If your population drops, your ability to intervene drops with it.
+- **Industrial Drain:** As your civilization advances into later eras (e.g., *The Age of Towers*), they begin to passively consume water and generate massive amounts of heat. You must constantly spend Faith to cool the planet and replenish water supplies, or your citizens will perish.
+
 ### Controls
 
 | Action | How |
 |--------|-----|
-| Rotate the world | Drag / swipe on the planet |
-| Pick a tool | Tap one of the four buttons in the bottom dock |
-| Use the tool | Tap the land while a tool is selected |
-| Change time speed | Use the ½× / 1× / 4× dial on the right |
-| Re-watch the guide | Tap the **?** in the top-right corner |
-| Toggle voice | Tap the speaker icon in the top-right corner |
+| **Rotate/Zoom** | Drag/swipe to rotate. Pinch/Scroll to zoom. |
+| **Pick a tool** | Tap one of the buttons in the bottom dock |
+| **Use the tool** | Tap the land while a tool is selected |
+| **Change time speed** | Use the ½× / 1× / 4× dial on the right |
+| **Toggle voice** | Tap the speaker icon to enable Text-to-Speech prophecies |
 
-### The four gestures
+### The Miracles (Tools)
 
-- **Rain** — adds water, sets weather to rain, nudges life forward.
-- **Sun** — adds warmth, clears storms, nudges life forward.
-- **Wind** — clears the sky, moves weather, a small breath across the world.
-- **Seed** — the biggest life boost. Plants a small green thing.
+- **Rain** — adds water, sets weather to rain, cools the planet.
+- **Sun** — adds warmth, clears storms.
+- **Wind** — clears the sky, moves weather.
+- **Seed** — plants life.
+- **Lightning (Targeted)** — destroys Blight. You must click *directly* near the Blight node in 3D space to destroy it. If you miss, you waste Faith and drastically raise the planet's **Fear**.
+- **Aegis** — A protective shield used to block impending natural disasters.
 
-### Combinations (the small grammar)
+### Disasters & The Prophecy System
 
-Try two tools in a row. Some pairs do something special:
-
-| Combo | How | Effect |
-|-------|-----|--------|
-| **Steam** | Rain on a warm world (warmth > 0.55) | Mist rises; weather becomes aurora |
-| **Bloom** | Seed when wet and warm (water > 0.45, warmth > 0.4) | Extra life burst |
-| **Drought** | Three Suns within ~12 seconds | Life drops, water drains |
-| **Exodus** | Wind within 5 seconds after Seed | A migration story is born |
+You will not be blindsided by disasters. The game features a **Prophecy System** that telegraphs impending doom. If a Heatwave or Flood is 60 ticks away, ominous text will appear on the screen. 
+*If you have Voice enabled, the AI Narrator will verbally announce the disaster aloud.* You must time your **Aegis** shield perfectly to survive the impact.
 
 ---
 
-## The world loop
+## The World Loop
 
 The planet runs on a tick loop. Every tick:
 
-- **Life** slowly grows on its own.
-- **Warmth** and **water** decay toward neutrality unless you tend them.
+- **Life** grows (if the environment is balanced) or dies (if temperatures/water reach extremes).
+- **Warmth** and **water** decay toward neutrality in early eras, but are aggressively manipulated by the population in later eras.
 - The world passes through **eras** based on total ticks:
   1. The Age of First Light
   2. The Age of Stones
   3. The Age of Myth
   4. The Age of Hearths
   5. The Age of Sails
-  6. The Age of Towers
+  6. The Age of Towers *(Industrial Drain begins)*
   7. The Long Age
 
-As **life** rises, the planet becomes visibly more populated:
+### Diegetic Atmosphere (Prayers)
 
-- `life < 0.05` — a quiet seed
-- `life < 0.20` — a stirring world
-- `life < 0.45` — a small civilization
-- `life < 0.70` — a thriving world
-- `life < 0.90` — a humming world
-- `life ≥ 0.90` — a world of many lights
-
-### Weather
-
-Weather is a soft state: **clear**, **rain**, **storm**, or **aurora**. It drifts back to clear over time. Weather affects the planet’s colour, the clouds, and the narrator’s observations.
-
-### Day / night
-
-A single directional light orbits the world. On the night side, settlements glow with warm window lights. On the day side, the toon-shaded land reads bright and flat.
+As the simulation runs, you will see tiny floating text bubbles rise from the surface of the planet. These are the prayers of your citizens. Their content changes dynamically based on the current world traits:
+- If **Fear** is high: *"Save us..."*
+- If **Curiosity** is high: *"What is beyond the glass?"*
+- If **Harmony** is high: *"We are at peace."*
 
 ---
 
-## The narrator
+## Endings (Win/Loss States)
 
-At the bottom of the screen a calm, italic line appears from time to time. The narrator is not a character inside the world — she is the voice of the observation itself, reading the planet to you.
+Unlike early versions of the game, Terrarium V3 features strict win and loss conditions.
 
-She speaks on:
-
-- tool use
-- era changes
-- life milestones
-- discovered combos
-- idle moments (every ~30–40 seconds)
-- rare **uncanny** lines after you have visited several times
-- **echo** lines that remember prior Keepers by name
-- the **pivot** — a one-time line after ~25 minutes of play
-- the **whisper** — very rare lines that break the fourth wall
-
-If you turn on the speaker icon, her lines are spoken aloud by a generated voice through the Lovable AI Gateway (voice: `ash`, style: calm British nature-documentary).
+- **Corruption (Game Over):** If you fail to destroy Blight nodes with Lightning, they will grow, drain your life force, and eventually consume the planet.
+- **Transcendence (Win):** If you successfully manage the planet's environment through the industrial eras while maintaining high Harmony, your civilization will transcend.
+- **Escape (Alternate Win):** If your civilization reaches the end of the simulation with high Fear and Curiosity, they will attempt to break out of the terrarium glass.
 
 ---
 
-## Choices
+## The Narrator & TTS
 
-From time to time a card rises from the bottom with a question. The people below are arguing, praying, or deciding something. You can answer, or choose the ghost option and let them sort it out themselves.
+At the bottom of the screen a calm, italic line appears from time to time. The narrator is the voice of observation itself. 
 
-Each choice nudges the world’s **traits**:
-
-- **faith** — do they believe something watches over them?
-- **curiosity** — do they ask dangerous questions?
-- **fear** — do they feel small before the sky?
-- **harmony** — do they find ways to agree?
-
-Traits unlock new myths and new curiosities. There are no wrong answers.
-
----
-
-## Myths
-
-Every choice and some special moments create a **myth** — a short prose fragment that appears on the right side of the screen. Myths are the world’s memory of you. Recent myths fade; older ones are kept forever in the world state.
-
-Examples:
-
-- *“They say the Warm One leaned close and the sea remembered how to move.”*
-- *“The rain came on the day they asked, and they sang of a kindness that listens.”*
-- *“The Warm One did not answer. The people learned to mend what they had broken, and called the silence a teaching.”*
-
----
-
-## Curiosities
-
-The small dot in the top-right opens the **Curiosities** panel: a list of soft, hidden objectives. They are not achievements in the usual sense — there is no score, no popup fanfare, just a quiet note that you noticed something.
-
-Some early Curiosities:
-
-- Send the first rain
-- Plant a green thing
-- Use every gesture
-- Witness the second age
-- Watch a civilisation arrive
-- Make steam
-- Coax a bloom
-- Let a generation pass untouched
-- Come back to them (visit a second session)
-
-Tier-2 Curiosities only reveal once the first tier is complete, including longer watches, more ages, and darker edges like *“Drown a country and let it recover.”*
-
----
-
-## The intro
-
-On first launch the game plays a short written sequence:
-
-1. **The gift** — “Every Keeper is given one.”
-2. **Name the world** — you give the terrarium a name.
-3. **Breathe warmth** — the ice begins to melt.
-4. **Let it rain** — the first water falls.
-5. **Plant the first spark** — life begins.
-6. **Begin tending** — the full HUD appears.
-
-After naming, a short cinematic explainer video auto-plays once (muted, looping). You can reopen it anytime via the **?** button.
-
----
-
-## Visual style
-
-The look is inspired by the chunky, graphic, cel-shaded **Messenger** aesthetic:
-
-- Flat saturated **terrarium teal** background (`#5fb8b8`).
-- Cel-shaded planet and props using `MeshToonMaterial` with a 3-step gradient map.
-- Dark **inverted-hull outlines** around the planet, houses, trees, and rocks — cheap, crisp, no post-processing.
-- Chunky illustrated props: houses with pitched roofs and chimneys, broadleaf and pine trees, scattered rocks.
-- Hand-drawn SVG doodles drifting in the DOM overlay.
-- Warm serif typography (Fraunces) against the cool background.
+If you turn on the speaker icon, her lines and the **Disaster Prophecies** are spoken aloud by a generated TTS voice through the Lovable AI Gateway (voice: `ash`, style: calm British nature-documentary).
 
 ---
 
@@ -183,8 +96,7 @@ The look is inspired by the chunky, graphic, cel-shaded **Messenger** aesthetic:
 - **State:** Zustand with `persist` middleware (localStorage)
 - **Styling:** Tailwind CSS v4 with custom theme tokens
 - **Audio / TTS:** Lovable AI Gateway (`/api/narrator` server route, streaming PCM)
-- **Noise:** `simplex-noise` for planet displacement
-- **Fonts:** Fraunces (serif) + Inter (sans)
+- **Math/Geometry:** Spherical trigonometry for precise 3D surface mapping.
 
 ---
 
@@ -192,53 +104,16 @@ The look is inspired by the chunky, graphic, cel-shaded **Messenger** aesthetic:
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Start the dev server
-bun run dev
+npm run dev
 
 # Build for production
-bun run build
+npm run build
 ```
 
 The TTS narrator route requires a `LOVABLE_API_KEY` environment variable. If it is missing, the subtitle still appears but no voice plays.
-
----
-
-## Project structure
-
-```
-src/
-  components/
-    scene/            # 3D planet, diorama, lights, weather, touch effects
-    ui-overlay/       # HUD, intro, choices, myths, narrator, tool dock, etc.
-  game/
-    store.ts          # Zustand world state + tick logic
-    eras.ts           # Era definitions
-    choices.ts        # Choice card data
-    combos.ts         # Combo detection
-    curiosities.ts    # Soft objective list
-    myths.ts          # Myth library
-    narrator-lines.ts # Narrator line pool + picker
-    planet-geometry.ts# Procedural planet mesh + surface sampling
-    toon-gradient.ts  # Cel-shading gradient + palette tokens
-    types.ts          # Shared TypeScript types
-  routes/
-    api/narrator.ts   # TTS server endpoint
-    __root.tsx        # Root layout
-    index.tsx         # Home page
-  styles.css          # Tailwind theme + animations
-```
-
----
-
-## Design notes
-
-- **No fail state.** The world cannot die. It can be pushed, neglected, flooded, or scorched, but it will keep turning.
-- **No explicit tutorial after the intro.** Discovery is part of the mood.
-- **Time moves faster than real life.** A whole age can pass while you make coffee.
-- **The world remembers you across sessions.** It notices when you return after a long absence.
-- **Small glitches are intentional.** Once every few minutes the rendered planet briefly scales wrong — a quiet reminder that even the image you are watching is a simulation.
 
 ---
 
